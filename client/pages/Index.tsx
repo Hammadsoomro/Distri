@@ -56,8 +56,8 @@ export default function Index() {
 function Hero() {
   return (
     <div className="rounded-2xl border border-white/10 p-6 bg-gradient-to-r from-primary/20 to-transparent">
-      <p className="uppercase text-xs tracking-widest text-primary-foreground/80 bg-primary/30 inline-flex px-2 py-1 rounded">Nayi App</p>
-      <h2 className="mt-3 text-3xl font-extrabold">Line Distributor – Aap ki team ke liye</h2>
+      <p className="uppercase text-xs tracking-widest text-primary-foreground/80 bg-primary/30 inline-flex px-2 py-1 rounded">New App</p>
+      <h2 className="mt-3 text-3xl font-extrabold">Line Distributor – For your team</h2>
       <p className="mt-2 text-white/70">Per-line text distribution with smart timers. Beautiful, fast, and reliable.</p>
     </div>
   );
