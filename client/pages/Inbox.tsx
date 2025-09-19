@@ -37,7 +37,7 @@ export default function Inbox() {
           {lines.map((l, i) => (
             <div key={i} className="p-2 rounded bg-white/5 border border-white/10">{l}</div>
           ))}
-          {lines.length === 0 && <p className="text-white/60">Abhi koi message nahi.</p>}
+          {lines.length === 0 && <p className="text-white/60">No messages yet.</p>}
         </div>
       </CardContent>
     </Card>
