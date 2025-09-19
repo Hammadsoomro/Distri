@@ -71,6 +71,13 @@ export function adminExists() {
 }
 
 export function publicUser(u: User) {
-  const { passwordHash, ...rest } = u;
-  return rest;
+  const { passwordHash } = u;
+  return {
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    role: u.role,
+    inboxCount: u.inbox.length,
+    unreadCount: u.inbox.filter((m) => !m.readBy.includes(u.id)).length,
+  };
 }
