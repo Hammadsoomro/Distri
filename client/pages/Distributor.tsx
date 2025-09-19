@@ -10,8 +10,10 @@ import type { PublicUser, Job } from "@shared/api";
 export default function Distributor() {
   const [members, setMembers] = useState<PublicUser[]>([]);
   const [text, setText] = useState("");
-  const [intervalSec, setIntervalSec] = useState<30 | 40 | 50>(30);
-  const [linesPerTick, setLinesPerTick] = useState<1 | 3 | 5>(1);
+  const intervalOptions = [30, 60, 120, 180, 240, 300] as const;
+  const lineOptions = [1, 3, 5, 7, 10, 12, 15] as const;
+  const [intervalSec, setIntervalSec] = useState<typeof intervalOptions[number]>(30);
+  const [linesPerTick, setLinesPerTick] = useState<typeof lineOptions[number]>(1);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [job, setJob] = useState<Job | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -63,26 +65,26 @@ export default function Distributor() {
       <Card className="bg-white/5 border-white/10 text-white">
         <CardHeader>
           <CardTitle>Distributor</CardTitle>
-          <CardDescription className="text-white/70">Timer aur lines per send set karein</CardDescription>
+          <CardDescription className="text-white/70">Set timer and lines-per-send</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label className="text-white">Text (har line alag bheji jayegi)</Label>
-            <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={10} className="bg-white/10 text-white border-white/20 placeholder:text-white/40" placeholder={"Yahan lines likhein...\nHar line alag message hoga."} />
+            <Label className="text-white">Text (each line will be sent separately)</Label>
+            <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={10} className="bg-white/10 text-white border-white/20 placeholder:text-white/40" placeholder={"Write lines here...\nEach line will be sent as a separate message."} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-white mb-2 block">Timer (sec)</Label>
-              <div className="flex gap-2">
-                {[30, 40, 50].map((s) => (
+              <div className="flex gap-2 flex-wrap">
+                {intervalOptions.map((s) => (
                   <Button key={s} type="button" variant={intervalSec === s ? "default" : "secondary"} onClick={() => setIntervalSec(s as any)}>{s}</Button>
                 ))}
               </div>
             </div>
             <div>
               <Label className="text-white mb-2 block">Lines per send</Label>
-              <div className="flex gap-2">
-                {[1, 3, 5].map((s) => (
+              <div className="flex gap-2 flex-wrap">
+                {lineOptions.map((s) => (
                   <Button key={s} type="button" variant={linesPerTick === s ? "default" : "secondary"} onClick={() => setLinesPerTick(s as any)}>{s}</Button>
                 ))}
               </div>
@@ -97,7 +99,7 @@ export default function Distributor() {
                   <span>{m.name} <span className="text-white/60">({m.email})</span></span>
                 </label>
               ))}
-              {members.length === 0 && <p className="text-white/60">Pehle team member add karein.</p>}
+              {members.length === 0 && <p className="text-white/60">Add team members first.</p>}
             </div>
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -108,7 +110,7 @@ export default function Distributor() {
       <Card className="bg-white/5 border-white/10 text-white">
         <CardHeader>
           <CardTitle>Jobs</CardTitle>
-          <CardDescription className="text-white/70">Chalne wali aur khtm jobs</CardDescription>
+          <CardDescription className="text-white/70">Running and completed jobs</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -125,7 +127,7 @@ export default function Distributor() {
                 )}
               </div>
             ))}
-            {jobs.length === 0 && <p className="text-white/60">Abhi koi job nahi.</p>}
+            {jobs.length === 0 && <p className="text-white/60">No jobs yet.</p>}
           </div>
         </CardContent>
       </Card>
