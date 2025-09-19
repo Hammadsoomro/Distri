@@ -1,4 +1,13 @@
-import { AuthResponse, CreateJobRequest, CreateMemberRequest, InboxResponse, JobResponse, JobsListResponse, PublicUser, TeamListResponse } from "@shared/api";
+import {
+  AuthResponse,
+  CreateJobRequest,
+  CreateMemberRequest,
+  InboxResponse,
+  JobResponse,
+  JobsListResponse,
+  PublicUser,
+  TeamListResponse,
+} from "@shared/api";
 
 const tokenKey = "auth_token";
 
@@ -35,10 +44,16 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export const AuthApi = {
   async adminSetup(name: string, email: string, password: string) {
-    return api<AuthResponse>("/api/auth/admin-setup", { method: "POST", body: JSON.stringify({ name, email, password }) });
+    return api<AuthResponse>("/api/auth/admin-setup", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password }),
+    });
   },
   async login(email: string, password: string) {
-    return api<AuthResponse>("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
+    return api<AuthResponse>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
   },
   async me() {
     const res = await api<{ user: PublicUser }>("/api/auth/me");
@@ -47,28 +62,80 @@ export const AuthApi = {
 };
 
 export const TeamApi = {
-  async list() { return api<TeamListResponse>("/api/team"); },
-  async create(input: CreateMemberRequest) { return api<{ member: PublicUser }>("/api/team", { method: "POST", body: JSON.stringify(input) }); },
-  async remove(id: string) { return api<{ ok: true }>(`/api/team/${id}`, { method: "DELETE" }); },
+  async list() {
+    return api<TeamListResponse>("/api/team");
+  },
+  async create(input: CreateMemberRequest) {
+    return api<{ member: PublicUser }>("/api/team", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+  async remove(id: string) {
+    return api<{ ok: true }>(`/api/team/${id}`, { method: "DELETE" });
+  },
 };
 
 export const DistributorApi = {
-  async createJob(input: CreateJobRequest) { return api<JobResponse>("/api/distribute", { method: "POST", body: JSON.stringify(input) }); },
-  async listJobs() { return api<JobsListResponse>("/api/jobs"); },
-  async getJob(id: string) { return api<JobResponse>(`/api/jobs/${id}`); },
-  async cancelJob(id: string) { return api<JobResponse>(`/api/jobs/${id}/cancel`, { method: "POST" }); },
+  async createJob(input: CreateJobRequest) {
+    return api<JobResponse>("/api/distribute", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+  async listJobs() {
+    return api<JobsListResponse>("/api/jobs");
+  },
+  async getJob(id: string) {
+    return api<JobResponse>(`/api/jobs/${id}`);
+  },
+  async cancelJob(id: string) {
+    return api<JobResponse>(`/api/jobs/${id}/cancel`, { method: "POST" });
+  },
 };
 
 export const InboxApi = {
-  async get() { return api<InboxResponse>("/api/inbox"); },
-  async clear() { return api<{ ok: true }>("/api/inbox/clear", { method: "POST" }); },
-  async markRead(messageIds?: string[]) { return api<{ ok: true }>("/api/inbox/mark-read", { method: "POST", body: JSON.stringify({ messageIds }) }); },
+  async get() {
+    return api<InboxResponse>("/api/inbox");
+  },
+  async clear() {
+    return api<{ ok: true }>("/api/inbox/clear", { method: "POST" });
+  },
+  async markRead(messageIds?: string[]) {
+    return api<{ ok: true }>("/api/inbox/mark-read", {
+      method: "POST",
+      body: JSON.stringify({ messageIds }),
+    });
+  },
 };
 
 export const ChatApi = {
-  async listConversations() { return api<ConversationsListResponse>("/api/chat"); },
-  async createConversation(participantIds: string[], isGroup = false, name?: string) { return api<{ conversation: Conversation }>("/api/chat", { method: "POST", body: JSON.stringify({ participantIds, isGroup, name }) }); },
-  async getConversation(id: string) { return api<ConversationResponse>(`/api/chat/${id}`); },
-  async sendMessage(conversationId: string, text: string) { return api<{ message: Message }>("/api/chat/send", { method: "POST", body: JSON.stringify({ conversationId, text }) }); },
-  async markRead(conversationId: string) { return api<{ ok: true }>("/api/chat/mark-read", { method: "POST", body: JSON.stringify({ conversationId }) }); },
+  async listConversations() {
+    return api<ConversationsListResponse>("/api/chat");
+  },
+  async createConversation(
+    participantIds: string[],
+    isGroup = false,
+    name?: string,
+  ) {
+    return api<{ conversation: Conversation }>("/api/chat", {
+      method: "POST",
+      body: JSON.stringify({ participantIds, isGroup, name }),
+    });
+  },
+  async getConversation(id: string) {
+    return api<ConversationResponse>(`/api/chat/${id}`);
+  },
+  async sendMessage(conversationId: string, text: string) {
+    return api<{ message: Message }>("/api/chat/send", {
+      method: "POST",
+      body: JSON.stringify({ conversationId, text }),
+    });
+  },
+  async markRead(conversationId: string) {
+    return api<{ ok: true }>("/api/chat/mark-read", {
+      method: "POST",
+      body: JSON.stringify({ conversationId }),
+    });
+  },
 };

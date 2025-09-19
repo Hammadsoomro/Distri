@@ -8,7 +8,13 @@ import { adminSetup, login, me } from "./routes/auth";
 import { listTeam, createMember, deleteMember } from "./routes/team";
 import { createJob, listJobs, getJob, cancelJob } from "./routes/distributor";
 import { getInbox, clearInbox } from "./routes/inbox";
-import { listConversations, createConversation, getConversation, sendMessage, markConversationRead } from "./routes/chat";
+import {
+  listConversations,
+  createConversation,
+  getConversation,
+  sendMessage,
+  markConversationRead,
+} from "./routes/chat";
 import { connectDB } from "./db";
 
 export function createServer() {
@@ -58,9 +64,14 @@ export function createServer() {
     const user = areq.user;
     if (!messageIds) {
       // mark all
-      user.inbox.forEach((m: any) => { if (!m.readBy.includes(user.id)) m.readBy.push(user.id); });
+      user.inbox.forEach((m: any) => {
+        if (!m.readBy.includes(user.id)) m.readBy.push(user.id);
+      });
     } else if (Array.isArray(messageIds)) {
-      user.inbox.forEach((m: any) => { if (messageIds.includes(m.id) && !m.readBy.includes(user.id)) m.readBy.push(user.id); });
+      user.inbox.forEach((m: any) => {
+        if (messageIds.includes(m.id) && !m.readBy.includes(user.id))
+          m.readBy.push(user.id);
+      });
     }
     res.json({ ok: true });
   });

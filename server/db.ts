@@ -54,7 +54,10 @@ const JobSchema = new Schema({
 });
 
 export const MessageModel = mongoose.model("Message", MessageSchema);
-export const ConversationModel = mongoose.model("Conversation", ConversationSchema);
+export const ConversationModel = mongoose.model(
+  "Conversation",
+  ConversationSchema,
+);
 export const UserModel = mongoose.model("User", UserSchema);
 export const JobModel = mongoose.model("Job", JobSchema);
 

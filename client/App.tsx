@@ -20,7 +20,13 @@ import { AppLayout } from "@/components/layout/AppLayout";
 
 const queryClient = new QueryClient();
 
-function RequireAuth({ children, role }: { children: React.ReactNode; role?: "admin" | "member" }) {
+function RequireAuth({
+  children,
+  role,
+}: {
+  children: React.ReactNode;
+  role?: "admin" | "member";
+}) {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
@@ -40,12 +46,54 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/team" element={<RequireAuth role="admin"><Team /></RequireAuth>} />
-              <Route path="/distributor" element={<RequireAuth role="admin"><Distributor /></RequireAuth>} />
-              <Route path="/jobs" element={<RequireAuth role="admin"><Jobs /></RequireAuth>} />
-              <Route path="/chat" element={<RequireAuth><Chat /></RequireAuth>} />
-              <Route path="/chat/:id" element={<RequireAuth><Chat /></RequireAuth>} />
-              <Route path="/inbox" element={<RequireAuth><Inbox /></RequireAuth>} />
+              <Route
+                path="/team"
+                element={
+                  <RequireAuth role="admin">
+                    <Team />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/distributor"
+                element={
+                  <RequireAuth role="admin">
+                    <Distributor />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/jobs"
+                element={
+                  <RequireAuth role="admin">
+                    <Jobs />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/chat"
+                element={
+                  <RequireAuth>
+                    <Chat />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/chat/:id"
+                element={
+                  <RequireAuth>
+                    <Chat />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/inbox"
+                element={
+                  <RequireAuth>
+                    <Inbox />
+                  </RequireAuth>
+                }
+              />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

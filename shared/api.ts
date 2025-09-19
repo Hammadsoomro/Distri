@@ -67,8 +67,12 @@ export interface SendMessageRequest {
   text: string;
 }
 
-export interface ConversationResponse { messages: Message[] }
-export interface ConversationsListResponse { conversations: ConversationSummary[] }
+export interface ConversationResponse {
+  messages: Message[];
+}
+export interface ConversationsListResponse {
+  conversations: ConversationSummary[];
+}
 
 export interface CreateMemberRequest {
   name: string;
@@ -95,7 +99,13 @@ export interface CreateJobRequest {
   targetIds: string[];
 }
 
-export interface JobsListResponse { jobs: Job[] }
-export interface JobResponse { job: Job }
+export interface JobsListResponse {
+  jobs: Job[];
+}
+export interface JobResponse {
+  job: Job;
+}
 
-export interface InboxResponse { inbox: string[] }
+export interface InboxResponse {
+  inbox: string[];
+}

@@ -17,7 +17,11 @@ function startTimer(job: DistributionJob) {
     for (const targetId of job.targets) {
       const target = db.users.get(targetId);
       if (!target) continue;
-      for (let i = 0; i < linesToSend && job.nextIndex < job.textLines.length; i++) {
+      for (
+        let i = 0;
+        i < linesToSend && job.nextIndex < job.textLines.length;
+        i++
+      ) {
         const line = job.textLines[job.nextIndex++];
         const msgId = newId("msg");
         const msg = {
@@ -42,9 +46,12 @@ export const createJob: RequestHandler = (req, res) => {
   const { text, intervalSec, linesPerTick, targetIds } = req.body || {};
   const validIntervals = [30, 60, 120, 180, 240, 300];
   const validLines = [1, 3, 5, 7, 10, 12, 15];
-  if (typeof text !== "string" || !text.trim()) return res.status(400).json({ error: "Invalid text" });
-  if (!validIntervals.includes(Number(intervalSec))) return res.status(400).json({ error: "Invalid interval" });
-  if (!validLines.includes(Number(linesPerTick))) return res.status(400).json({ error: "Invalid linesPerTick" });
+  if (typeof text !== "string" || !text.trim())
+    return res.status(400).json({ error: "Invalid text" });
+  if (!validIntervals.includes(Number(intervalSec)))
+    return res.status(400).json({ error: "Invalid interval" });
+  if (!validLines.includes(Number(linesPerTick)))
+    return res.status(400).json({ error: "Invalid linesPerTick" });
   const targets: string[] = Array.isArray(targetIds) ? targetIds : [];
   if (!targets.length) return res.status(400).json({ error: "No targets" });
   const textLines = text.replace(/\r\n/g, "\n").split("\n");
@@ -79,7 +86,8 @@ export const getJob: RequestHandler = (req, res) => {
   if (!requireUser(areq, res, "admin")) return;
   const { id } = req.params;
   const job = id ? db.jobs.get(id) : undefined;
-  if (!job || job.ownerId !== areq.user!.id) return res.status(404).json({ error: "Not found" });
+  if (!job || job.ownerId !== areq.user!.id)
+    return res.status(404).json({ error: "Not found" });
   res.json({ job: { ...job, _timer: undefined } });
 };
 
@@ -88,7 +96,8 @@ export const cancelJob: RequestHandler = (req, res) => {
   if (!requireUser(areq, res, "admin")) return;
   const { id } = req.params;
   const job = id ? db.jobs.get(id) : undefined;
-  if (!job || job.ownerId !== areq.user!.id) return res.status(404).json({ error: "Not found" });
+  if (!job || job.ownerId !== areq.user!.id)
+    return res.status(404).json({ error: "Not found" });
   if (job._timer) clearInterval(job._timer);
   job.status = "cancelled";
   job._timer = undefined as any;

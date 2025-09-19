@@ -30,7 +30,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     })();
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Poll inbox for notifications
@@ -41,7 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const res = await (await import("@/lib/api")).InboxApi.get();
         const inbox = (res as any).inbox || [];
-        const unread = inbox.filter((m: any) => !m.readBy.includes((user as any)?.id)).length;
+        const unread = inbox.filter(
+          (m: any) => !m.readBy.includes((user as any)?.id),
+        ).length;
         if (user && typeof lastCount === "number" && unread > lastCount) {
           // notify
           try {
@@ -61,28 +65,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(t);
   }, [user]);
 
-  const value = useMemo<AuthContextValue>(() => ({
-    user,
-    loading,
-    async login(email, password) {
-      const res = await AuthApi.login(email, password);
-      setToken(res.token);
-      setUser(res.user);
-    },
-    async adminSetup(name, email, password) {
-      const res = await AuthApi.adminSetup(name, email, password);
-      setToken(res.token);
-      setUser(res.user);
-    },
-    logout() {
-      clearToken();
-      setUser(null);
-    },
-    async refresh() {
-      const u = await AuthApi.me();
-      setUser(u);
-    },
-  }), [user, loading]);
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      loading,
+      async login(email, password) {
+        const res = await AuthApi.login(email, password);
+        setToken(res.token);
+        setUser(res.user);
+      },
+      async adminSetup(name, email, password) {
+        const res = await AuthApi.adminSetup(name, email, password);
+        setToken(res.token);
+        setUser(res.user);
+      },
+      logout() {
+        clearToken();
+        setUser(null);
+      },
+      async refresh() {
+        const u = await AuthApi.me();
+        setUser(u);
+      },
+    }),
+    [user, loading],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

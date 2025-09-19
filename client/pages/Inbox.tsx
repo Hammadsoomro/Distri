@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InboxApi } from "@/lib/api";
 import type { Message } from "@shared/api";
@@ -34,30 +40,49 @@ export default function Inbox() {
     <Card className="bg-white/5 border-white/10 text-white">
       <CardHeader>
         <CardTitle>Inbox</CardTitle>
-        <CardDescription className="text-white/70">Lines sent to you</CardDescription>
+        <CardDescription className="text-white/70">
+          Lines sent to you
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-between mb-3">
           <p className="text-white/70 text-sm">Total {lines.length}</p>
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={markAllRead}>Mark all read</Button>
-            <Button variant="secondary" onClick={clear}>Clear</Button>
+            <Button variant="secondary" onClick={markAllRead}>
+              Mark all read
+            </Button>
+            <Button variant="secondary" onClick={clear}>
+              Clear
+            </Button>
           </div>
         </div>
         <div className="space-y-2 max-h-[60vh] overflow-auto pr-2">
           {lines.map((l) => (
-            <div key={l.id} className={`p-2 rounded bg-white/5 border border-white/10 flex justify-between items-start ${l.readBy.includes(user?.id || "") ? 'opacity-60' : ''}`}>
+            <div
+              key={l.id}
+              className={`p-2 rounded bg-white/5 border border-white/10 flex justify-between items-start ${l.readBy.includes(user?.id || "") ? "opacity-60" : ""}`}
+            >
               <div>
-                <div className="text-sm text-white/80">{l.fromId || 'System'}</div>
+                <div className="text-sm text-white/80">
+                  {l.fromId || "System"}
+                </div>
                 <div className="mt-1">{l.text}</div>
-                <div className="text-xs text-white/60 mt-1">{new Date(l.ts).toLocaleString()}</div>
+                <div className="text-xs text-white/60 mt-1">
+                  {new Date(l.ts).toLocaleString()}
+                </div>
               </div>
               <div className="flex flex-col gap-2">
-                {!l.readBy.includes(user?.id || "") && <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded">New</span>}
+                {!l.readBy.includes(user?.id || "") && (
+                  <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded">
+                    New
+                  </span>
+                )}
               </div>
             </div>
           ))}
-          {lines.length === 0 && <p className="text-white/60">No messages yet.</p>}
+          {lines.length === 0 && (
+            <p className="text-white/60">No messages yet.</p>
+          )}
         </div>
       </CardContent>
     </Card>

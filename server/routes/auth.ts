@@ -1,12 +1,22 @@
 import type { RequestHandler } from "express";
-import { adminExists, db, findUserByEmail, hashPassword, newId, publicUser } from "../store";
+import {
+  adminExists,
+  db,
+  findUserByEmail,
+  hashPassword,
+  newId,
+  publicUser,
+} from "../store";
 import { signToken } from "../auth";
 
 export const adminSetup: RequestHandler = (req, res) => {
   const { name, email, password } = req.body || {};
-  if (!name || !email || !password) return res.status(400).json({ error: "Missing fields" });
-  if (adminExists()) return res.status(400).json({ error: "Admin already exists" });
-  if (findUserByEmail(email)) return res.status(400).json({ error: "Email already in use" });
+  if (!name || !email || !password)
+    return res.status(400).json({ error: "Missing fields" });
+  if (adminExists())
+    return res.status(400).json({ error: "Admin already exists" });
+  if (findUserByEmail(email))
+    return res.status(400).json({ error: "Email already in use" });
   const id = newId("user");
   const user = {
     id,
@@ -23,9 +33,11 @@ export const adminSetup: RequestHandler = (req, res) => {
 
 export const login: RequestHandler = (req, res) => {
   const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: "Missing fields" });
+  if (!email || !password)
+    return res.status(400).json({ error: "Missing fields" });
   const u = findUserByEmail(email);
-  if (!u || u.passwordHash !== hashPassword(password)) return res.status(401).json({ error: "Invalid credentials" });
+  if (!u || u.passwordHash !== hashPassword(password))
+    return res.status(401).json({ error: "Invalid credentials" });
   const token = signToken({ uid: u.id, ts: Date.now() });
   res.json({ token, user: publicUser(u) });
 };
