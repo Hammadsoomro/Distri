@@ -62,4 +62,13 @@ export const DistributorApi = {
 export const InboxApi = {
   async get() { return api<InboxResponse>("/api/inbox"); },
   async clear() { return api<{ ok: true }>("/api/inbox/clear", { method: "POST" }); },
+  async markRead(messageIds?: string[]) { return api<{ ok: true }>("/api/inbox/mark-read", { method: "POST", body: JSON.stringify({ messageIds }) }); },
+};
+
+export const ChatApi = {
+  async listConversations() { return api<ConversationsListResponse>("/api/chat"); },
+  async createConversation(participantIds: string[], isGroup = false, name?: string) { return api<{ conversation: Conversation }>("/api/chat", { method: "POST", body: JSON.stringify({ participantIds, isGroup, name }) }); },
+  async getConversation(id: string) { return api<ConversationResponse>(`/api/chat/${id}`); },
+  async sendMessage(conversationId: string, text: string) { return api<{ message: Message }>("/api/chat/send", { method: "POST", body: JSON.stringify({ conversationId, text }) }); },
+  async markRead(conversationId: string) { return api<{ ok: true }>("/api/chat/mark-read", { method: "POST", body: JSON.stringify({ conversationId }) }); },
 };
