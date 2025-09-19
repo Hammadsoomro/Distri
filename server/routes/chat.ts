@@ -23,6 +23,17 @@ export const createConversation: RequestHandler = (req, res) => {
   const provided = Array.isArray(participantIds) ? participantIds : [];
   const all = Array.from(new Set([areq.user!.id, ...provided]));
   if (all.length === 0) return res.status(400).json({ error: "Invalid participants" });
+
+  // If this is a 1-on-1, check for existing conversation between the two participants and reuse it
+  if (!isGroup && all.length === 2) {
+    const [a, b] = all;
+    for (const c of db.conversations.values()) {
+      if (!c.isGroup && c.participantIds.length === 2 && c.participantIds.includes(a) && c.participantIds.includes(b)) {
+        return res.json({ conversation: { id: c.id, name: c.name, participantIds: c.participantIds, isGroup: c.isGroup } });
+      }
+    }
+  }
+
   const id = newId("conv");
   const conv = { id, name: name || undefined, participantIds: all, isGroup: !!isGroup, messages: [] };
   db.conversations.set(id, conv);
