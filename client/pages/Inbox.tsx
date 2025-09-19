@@ -46,14 +46,14 @@ export default function Inbox() {
         </div>
         <div className="space-y-2 max-h-[60vh] overflow-auto pr-2">
           {lines.map((l) => (
-            <div key={l.id} className={`p-2 rounded bg-white/5 border border-white/10 flex justify-between items-start ${l.readBy.includes((window as any).__CURRENT_USER_ID__ || "") ? 'opacity-60' : ''}`}>
+            <div key={l.id} className={`p-2 rounded bg-white/5 border border-white/10 flex justify-between items-start ${l.readBy.includes(user?.id || "") ? 'opacity-60' : ''}`}>
               <div>
                 <div className="text-sm text-white/80">{l.fromId || 'System'}</div>
                 <div className="mt-1">{l.text}</div>
                 <div className="text-xs text-white/60 mt-1">{new Date(l.ts).toLocaleString()}</div>
               </div>
               <div className="flex flex-col gap-2">
-                {!l.readBy.includes((window as any).__CURRENT_USER_ID__ || "") && <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded">New</span>}
+                {!l.readBy.includes(user?.id || "") && <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded">New</span>}
               </div>
             </div>
           ))}
