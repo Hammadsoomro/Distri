@@ -3,8 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { InboxApi } from "@/lib/api";
 import type { Message } from "@shared/api";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Inbox() {
+  const { user } = useAuth();
   const [lines, setLines] = useState<Message[]>([]);
 
   const load = async () => {
