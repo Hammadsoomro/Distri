@@ -31,7 +31,7 @@ export default function Index() {
     <div className="grid lg:grid-cols-2 gap-8 items-center">
       <div>
         <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight">
-          Team ko auto per-line messages bhejein
+          Send automated per-line messages to your team
         </h1>
         <p className="mt-4 text-white/70 text-lg">
           Login, signup, and distributor — everything in one place. Configure timers and lines per send, create team member accounts (name, email, password), and they will receive messages in their inbox.
