@@ -50,8 +50,8 @@ export interface Job {
 
 export interface CreateJobRequest {
   text: string;
-  intervalSec: 30 | 40 | 50;
-  linesPerTick: 1 | 3 | 5;
+  intervalSec: 30 | 60 | 120 | 180 | 240 | 300;
+  linesPerTick: 1 | 3 | 5 | 7 | 10 | 12 | 15;
   targetIds: string[];
 }
 
