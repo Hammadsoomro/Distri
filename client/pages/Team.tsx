@@ -79,7 +79,7 @@ export default function Team() {
                 <Button variant="destructive" onClick={() => remove(m.id)}>Delete</Button>
               </li>
             ))}
-            {members.length === 0 && <p className="text-white/60">Abhi koi member nahi.</p>}
+            {members.length === 0 && <p className="text-white/60">No members yet.</p>}
           </ul>
         </CardContent>
       </Card>
