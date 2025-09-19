@@ -26,7 +26,7 @@ export default function Inbox() {
     <Card className="bg-white/5 border-white/10 text-white">
       <CardHeader>
         <CardTitle>Inbox</CardTitle>
-        <CardDescription className="text-white/70">Aap ko aane wali lines</CardDescription>
+        <CardDescription className="text-white/70">Lines sent to you</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-between mb-3">
