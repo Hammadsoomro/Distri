@@ -18,17 +18,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     (async () => {
       try {
         const u = await AuthApi.me();
-        setUser(u);
+        if (mounted) setUser(u);
       } catch {
-        setUser(null);
+        if (mounted) setUser(null);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     })();
+
+    return () => { mounted = false; };
   }, []);
+
+  // Poll inbox for notifications
+  useEffect(() => {
+    let t: any;
+    let lastCount = 0;
+    async function poll() {
+      try {
+        const res = await (await import("@/lib/api")).InboxApi.get();
+        const inbox = (res as any).inbox || [];
+        const unread = inbox.filter((m: any) => !m.readBy.includes((user as any)?.id)).length;
+        if (user && typeof lastCount === "number" && unread > lastCount) {
+          // notify
+          try {
+            const { toast } = await import("sonner");
+            toast(`${unread - lastCount} new message(s)`);
+          } catch {}
+        }
+        lastCount = unread;
+      } catch {
+        // ignore
+      }
+    }
+    if (user) {
+      poll();
+      t = setInterval(poll, 2500);
+    }
+    return () => clearInterval(t);
+  }, [user]);
 
   const value = useMemo<AuthContextValue>(() => ({
     user,
