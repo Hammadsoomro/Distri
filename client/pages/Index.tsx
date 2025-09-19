@@ -41,7 +41,7 @@ export default function Index() {
           <Button variant="secondary" onClick={() => nav("/signup")}>Admin Setup</Button>
         </div>
         <div className="mt-10 grid grid-cols-2 gap-4">
-          {["30/40/50 sec timer", "1/3/5 lines per send", "Admin-controlled team", "Real-time inbox"].map((f) => (
+          {["30-300s timers (configurable)", "Multiple lines per send (1,3,5,7,10,12,15)", "Admin-controlled team", "Real-time inbox"].map((f) => (
             <Card key={f} className="bg-white/5 border-white/10 text-white"><CardContent className="p-4">{f}</CardContent></Card>
           ))}
         </div>
