@@ -38,7 +38,7 @@ export default function Jobs() {
               )}
             </div>
           ))}
-          {jobs.length === 0 && <p className="text-white/60">Abhi koi job nahi.</p>}
+          {jobs.length === 0 && <p className="text-white/60">No jobs yet.</p>}
         </div>
       </CardContent>
     </Card>
