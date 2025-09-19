@@ -19,7 +19,17 @@ function startTimer(job: DistributionJob) {
       if (!target) continue;
       for (let i = 0; i < linesToSend && job.nextIndex < job.textLines.length; i++) {
         const line = job.textLines[job.nextIndex++];
-        target.inbox.push(line);
+        const msgId = newId("msg");
+        const msg = {
+          id: msgId,
+          text: line,
+          fromId: job.ownerId,
+          ts: Date.now(),
+          readBy: [],
+          conversationId: undefined,
+        };
+        target.inbox.push(msg);
+        db.messages.set(msgId, msg);
       }
     }
   };
