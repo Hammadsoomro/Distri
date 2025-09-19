@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChatApi } from "@/lib/api";
-import type { ConversationSummary, Message } from "@shared/api";
+import { ChatApi, TeamApi } from "@/lib/api";
+import type { ConversationSummary, Message, PublicUser } from "@shared/api";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function ChatPage() {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [members, setMembers] = useState<PublicUser[]>([]);
   const [active, setActive] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
@@ -18,8 +20,12 @@ export default function ChatPage() {
     const res = await ChatApi.listConversations();
     setConversations(res.conversations);
   };
+  const loadMembers = async () => {
+    const res = await TeamApi.list();
+    setMembers(res.members);
+  };
 
-  useEffect(() => { loadConvos(); const t = setInterval(loadConvos, 3000); return () => clearInterval(t); }, []);
+  useEffect(() => { loadConvos(); loadMembers(); const t = setInterval(loadConvos, 3000); return () => clearInterval(t); }, []);
 
   useEffect(() => {
     if (id) setActive(id);
@@ -42,9 +48,23 @@ export default function ChatPage() {
 
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages]);
 
-  const startGroup = async () => {
-    const name = prompt("Group name") || "Team Chat";
-    const res = await ChatApi.createConversation([], true, name);
+  const openOrCreate1to1 = async (memberId: string) => {
+    // Try find existing convo
+    const meConvs = conversations.filter((c) => !c.isGroup);
+    const found = meConvs.find((c) => c.participantIds.includes(memberId));
+    if (found) {
+      nav(`/chat/${found.id}`);
+      return;
+    }
+    const res = await ChatApi.createConversation([memberId], false);
+    nav(`/chat/${res.conversation.id}`);
+  };
+
+  const openOrCreateGroup = async () => {
+    // find group named Team Group
+    const found = conversations.find((c) => c.isGroup && (c.name || '').toLowerCase().includes('team'));
+    if (found) { nav(`/chat/${found.id}`); return; }
+    const res = await ChatApi.createConversation([], true, 'Team Group');
     nav(`/chat/${res.conversation.id}`);
   };
 
@@ -57,36 +77,38 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="grid lg:grid-cols-4 gap-6">
-      <Card className="col-span-1 bg-white/5 border-white/10 text-white">
+    <div className="grid lg:grid-cols-4 gap-6 h-[70vh]">
+      <Card className="col-span-1 bg-white/5 border-white/10 text-white overflow-auto">
         <CardHeader>
-          <CardTitle>Conversations</CardTitle>
+          <CardTitle>Contacts</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-2">
-            <Button onClick={startGroup}>New Group</Button>
-            {conversations.map((c) => (
-              <div key={c.id} className={`p-2 rounded cursor-pointer hover:bg-white/5 ${active === c.id ? 'bg-white/5' : ''}`} onClick={() => nav(`/chat/${c.id}`)}>
+          <div className="mb-3">
+            <Button onClick={openOrCreateGroup} className="w-full">Team Group</Button>
+          </div>
+          <div className="space-y-2">
+            {members.map((m) => (
+              <div key={m.id} className={`p-2 rounded cursor-pointer hover:bg-white/5 ${active && conversations.find(c => c.id === active && c.participantIds.includes(m.id)) ? 'bg-white/5' : ''}`} onClick={() => openOrCreate1to1(m.id)}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium">{c.name || (c.isGroup ? 'Group' : 'Conversation')}</div>
-                    <div className="text-white/60 text-sm">{c.lastMessage?.text?.slice(0, 80)}</div>
+                    <div className="font-medium">{m.name}</div>
+                    <div className="text-white/60 text-sm">{m.email}</div>
                   </div>
-                  {c.unreadCount > 0 && <div className="text-xs bg-red-600 text-white px-2 py-0.5 rounded">{c.unreadCount}</div>}
+                  {m.unreadCount > 0 && <div className="text-xs bg-red-600 text-white px-2 py-0.5 rounded">{m.unreadCount}</div>}
                 </div>
               </div>
             ))}
-            {conversations.length === 0 && <div className="text-white/60">No conversations.</div>}
+            {members.length === 0 && <div className="text-white/60">No contacts.</div>}
           </div>
         </CardContent>
       </Card>
 
       <div className="lg:col-span-3">
-        <Card className="bg-white/5 border-white/10 text-white">
+        <Card className="bg-white/5 border-white/10 text-white h-full flex flex-col">
           <CardHeader>
             <CardTitle>Chat</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1">
             <div ref={scrollRef} className="max-h-[60vh] overflow-auto space-y-3 p-2">
               {messages.map((m) => (
                 <div key={m.id} className="p-2 rounded bg-white/5">
@@ -97,11 +119,13 @@ export default function ChatPage() {
               ))}
               {messages.length === 0 && <div className="text-white/60">No messages selected.</div>}
             </div>
+          </CardContent>
+          <div className="p-4">
             <div className="mt-4 flex gap-2">
               <input value={text} onChange={(e) => setText(e.target.value)} className="flex-1 rounded px-3 py-2 bg-white/5 border border-white/10 text-white" placeholder="Type a message..." />
               <Button onClick={send}>Send</Button>
             </div>
-          </CardContent>
+          </div>
         </Card>
       </div>
     </div>
