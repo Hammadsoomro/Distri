@@ -34,7 +34,7 @@ export default function Index() {
           Team ko auto per-line messages bhejein
         </h1>
         <p className="mt-4 text-white/70 text-lg">
-          Login, signup, distributor – sab kuch ek jagah. 30/40/50 sec timer aur 1, 3, 5 lines per send set karein. Aap team member ka account khud banayein (name, email, password) aur wo login kar ke inbox me messages paayega.
+          Login, signup, and distributor — everything in one place. Configure timers and lines per send, create team member accounts (name, email, password), and they will receive messages in their inbox.
         </p>
         <div className="mt-6 flex gap-3">
           <Button onClick={() => nav("/login")}>Login</Button>
