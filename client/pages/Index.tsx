@@ -1,62 +1,75 @@
-import { DemoResponse } from "@shared/api";
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
+import Distributor from "./Distributor";
+import Inbox from "./Inbox";
+import { useNavigate } from "react-router-dom";
 
 export default function Index() {
-  const [exampleFromServer, setExampleFromServer] = useState("");
-  // Fetch users on component mount
-  useEffect(() => {
-    fetchDemo();
-  }, []);
+  const { user } = useAuth();
+  const nav = useNavigate();
 
-  // Example of how to fetch data from the server (if needed)
-  const fetchDemo = async () => {
-    try {
-      const response = await fetch("/api/demo");
-      const data = (await response.json()) as DemoResponse;
-      setExampleFromServer(data.message);
-    } catch (error) {
-      console.error("Error fetching hello:", error);
-    }
-  };
+  if (user?.role === "admin") {
+    return (
+      <div className="space-y-6">
+        <Hero />
+        <Distributor />
+      </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <div className="space-y-6">
+        <Hero />
+        <Inbox />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-      <div className="text-center">
-        {/* TODO: FUSION_GENERATION_APP_PLACEHOLDER replace everything here with the actual app! */}
-        <h1 className="text-2xl font-semibold text-slate-800 flex items-center justify-center gap-3">
-          <svg
-            className="animate-spin h-8 w-8 text-slate-400"
-            viewBox="0 0 50 50"
-          >
-            <circle
-              className="opacity-30"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-            />
-            <circle
-              className="text-slate-600"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-              strokeDasharray="100"
-              strokeDashoffset="75"
-            />
-          </svg>
-          Generating your app...
+    <div className="grid lg:grid-cols-2 gap-8 items-center">
+      <div>
+        <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight">
+          Team ko auto per-line messages bhejein
         </h1>
-        <p className="mt-4 text-slate-600 max-w-md">
-          Watch the chat on the left for updates that might need your attention
-          to finish generating
+        <p className="mt-4 text-white/70 text-lg">
+          Login, signup, distributor – sab kuch ek jagah. 30/40/50 sec timer aur 1, 3, 5 lines per send set karein. Aap team member ka account khud banayein (name, email, password) aur wo login kar ke inbox me messages paayega.
         </p>
-        <p className="mt-4 hidden max-w-md">{exampleFromServer}</p>
+        <div className="mt-6 flex gap-3">
+          <Button onClick={() => nav("/login")}>Login</Button>
+          <Button variant="secondary" onClick={() => nav("/signup")}>Admin Setup</Button>
+        </div>
+        <div className="mt-10 grid grid-cols-2 gap-4">
+          {["30/40/50 sec timer", "1/3/5 lines per send", "Admin-controlled team", "Real-time inbox"].map((f) => (
+            <Card key={f} className="bg-white/5 border-white/10 text-white"><CardContent className="p-4">{f}</CardContent></Card>
+          ))}
+        </div>
       </div>
+      <div className="relative">
+        <PreviewPanel />
+      </div>
+    </div>
+  );
+}
+
+function Hero() {
+  return (
+    <div className="rounded-2xl border border-white/10 p-6 bg-gradient-to-r from-primary/20 to-transparent">
+      <p className="uppercase text-xs tracking-widest text-primary-foreground/80 bg-primary/30 inline-flex px-2 py-1 rounded">Nayi App</p>
+      <h2 className="mt-3 text-3xl font-extrabold">Line Distributor – Aap ki team ke liye</h2>
+      <p className="mt-2 text-white/70">Per-line text distribution with smart timers. Beautiful, fast, and reliable.</p>
+    </div>
+  );
+}
+
+function PreviewPanel() {
+  return (
+    <div className="rounded-xl border border-white/10 p-4 bg-white/5">
+      <div className="h-64 rounded bg-[linear-gradient(120deg,rgba(255,255,255,0.08),transparent)] flex items-center justify-center text-white/70">
+        Distribution UI preview
+      </div>
+      <p className="mt-3 text-white/60 text-sm">Login karke full distributor use karein.</p>
     </div>
   );
 }
