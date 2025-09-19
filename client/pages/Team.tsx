@@ -3,8 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { TeamApi } from "@/lib/api";
+import { TeamApi, ChatApi } from "@/lib/api";
 import type { PublicUser } from "@shared/api";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Team() {
   const [members, setMembers] = useState<PublicUser[]>([]);
@@ -12,6 +14,7 @@ export default function Team() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const nav = useNavigate();
 
   const load = async () => {
     const res = await TeamApi.list();
@@ -35,6 +38,13 @@ export default function Team() {
   const remove = async (id: string) => {
     await TeamApi.remove(id);
     await load();
+  };
+
+  const startChat = async (memberId: string) => {
+    // create a 1-on-1 conversation including current admin and the member
+    const res = await ChatApi.createConversation([memberId], false);
+    const conv = res.conversation;
+    nav(`/chat/${conv.id}`);
   };
 
   return (
@@ -66,17 +76,23 @@ export default function Team() {
       <Card className="bg-white/5 border-white/10 text-white">
         <CardHeader>
           <CardTitle>Team Members</CardTitle>
-          <CardDescription className="text-white/70">Kul {members.length}</CardDescription>
+          <CardDescription className="text-white/70">Total {members.length}</CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="divide-y divide-white/10">
             {members.map((m) => (
               <li key={m.id} className="py-3 flex items-center justify-between">
                 <div>
-                  <p className="font-medium">{m.name}</p>
+                  <p className="font-medium flex items-center gap-3">
+                    {m.name}
+                    {m.unreadCount > 0 && <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded">{m.unreadCount}</span>}
+                  </p>
                   <p className="text-white/60 text-sm">{m.email}</p>
                 </div>
-                <Button variant="destructive" onClick={() => remove(m.id)}>Delete</Button>
+                <div className="flex items-center gap-2">
+                  <Button onClick={() => startChat(m.id)}>Chat</Button>
+                  <Button variant="destructive" onClick={() => remove(m.id)}>Delete</Button>
+                </div>
               </li>
             ))}
             {members.length === 0 && <p className="text-white/60">No members yet.</p>}
