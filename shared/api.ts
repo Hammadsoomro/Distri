@@ -18,7 +18,8 @@ export interface PublicUser {
   name: string;
   email: string;
   role: Role;
-  inbox: string[];
+  inboxCount: number;
+  unreadCount: number;
 }
 
 export interface AuthResponse {
@@ -29,6 +30,45 @@ export interface AuthResponse {
 export interface TeamListResponse {
   members: PublicUser[];
 }
+
+export interface Message {
+  id: string;
+  text: string;
+  fromId: string | null;
+  ts: number;
+  readBy: string[];
+  conversationId?: string;
+}
+
+export interface Conversation {
+  id: string;
+  name?: string;
+  participantIds: string[];
+  isGroup: boolean;
+}
+
+export interface ConversationSummary {
+  id: string;
+  name?: string;
+  participantIds: string[];
+  isGroup: boolean;
+  unreadCount: number;
+  lastMessage?: Message;
+}
+
+export interface CreateConversationRequest {
+  participantIds: string[];
+  isGroup?: boolean;
+  name?: string;
+}
+
+export interface SendMessageRequest {
+  conversationId: string;
+  text: string;
+}
+
+export interface ConversationResponse { messages: Message[] }
+export interface ConversationsListResponse { conversations: ConversationSummary[] }
 
 export interface CreateMemberRequest {
   name: string;
