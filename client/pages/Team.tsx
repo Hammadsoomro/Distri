@@ -41,8 +41,8 @@ export default function Team() {
     <div className="grid md:grid-cols-2 gap-6">
       <Card className="bg-white/5 border-white/10 text-white">
         <CardHeader>
-          <CardTitle>Naya Team Member</CardTitle>
-          <CardDescription className="text-white/70">Name, email aur password set karein</CardDescription>
+          <CardTitle>New Team Member</CardTitle>
+          <CardDescription className="text-white/70">Set name, email and password</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={add} className="space-y-4">
