@@ -20,9 +20,11 @@ export const createConversation: RequestHandler = (req, res) => {
   const areq = req as AuthedRequest;
   if (!requireUser(areq, res)) return;
   const { participantIds, isGroup, name } = req.body || {};
-  if (!Array.isArray(participantIds) || participantIds.length === 0) return res.status(400).json({ error: "Invalid participants" });
+  const provided = Array.isArray(participantIds) ? participantIds : [];
+  const all = Array.from(new Set([areq.user!.id, ...provided]));
+  if (all.length === 0) return res.status(400).json({ error: "Invalid participants" });
   const id = newId("conv");
-  const conv = { id, name: name || undefined, participantIds, isGroup: !!isGroup, messages: [] };
+  const conv = { id, name: name || undefined, participantIds: all, isGroup: !!isGroup, messages: [] };
   db.conversations.set(id, conv);
   res.json({ conversation: { id: conv.id, name: conv.name, participantIds: conv.participantIds, isGroup: conv.isGroup } });
 };
