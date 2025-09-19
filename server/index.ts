@@ -1,4 +1,5 @@
 import "dotenv/config";
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
@@ -7,9 +8,14 @@ import { adminSetup, login, me } from "./routes/auth";
 import { listTeam, createMember, deleteMember } from "./routes/team";
 import { createJob, listJobs, getJob, cancelJob } from "./routes/distributor";
 import { getInbox, clearInbox } from "./routes/inbox";
+import { listConversations, createConversation, getConversation, sendMessage, markConversationRead } from "./routes/chat";
+import { connectDB } from "./db";
 
 export function createServer() {
   const app = express();
+
+  // Connect to DB (async)
+  connectDB().catch((err) => console.error("DB connect error", err));
 
   // Middleware
   app.use(cors());
