@@ -2,13 +2,30 @@ import crypto from "crypto";
 
 export type Role = "admin" | "member";
 
+export interface Message {
+  id: string;
+  text: string;
+  fromId: string | null; // null for system
+  ts: number;
+  readBy: string[]; // user ids who have read
+  conversationId?: string;
+}
+
+export interface Conversation {
+  id: string;
+  name?: string;
+  participantIds: string[];
+  isGroup: boolean;
+  messages: Message[];
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   passwordHash: string;
   role: Role;
-  inbox: string[];
+  inbox: Message[]; // direct messages / system messages
 }
 
 export interface DistributionJob {
@@ -27,6 +44,8 @@ export interface DistributionJob {
 export const db = {
   users: new Map<string, User>(),
   jobs: new Map<string, DistributionJob>(),
+  conversations: new Map<string, Conversation>(),
+  messages: new Map<string, Message>(),
 };
 
 export function hashPassword(password: string) {
