@@ -14,6 +14,7 @@ import Team from "./pages/Team";
 import Distributor from "./pages/Distributor";
 import Inbox from "./pages/Inbox";
 import Jobs from "./pages/Jobs";
+import Chat from "./pages/Chat";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/layout/AppLayout";
 
