@@ -44,6 +44,27 @@ export function createServer() {
   // Inbox (member or admin)
   app.get("/api/inbox", getInbox);
   app.post("/api/inbox/clear", clearInbox);
+  app.post("/api/inbox/mark-read", (req, res) => {
+    // Mark message ids as read in user's inbox
+    const areq: any = req as any;
+    if (!areq.user) return res.status(401).json({ error: "Unauthorized" });
+    const { messageIds } = req.body || {};
+    const user = areq.user;
+    if (!messageIds) {
+      // mark all
+      user.inbox.forEach((m: any) => { if (!m.readBy.includes(user.id)) m.readBy.push(user.id); });
+    } else if (Array.isArray(messageIds)) {
+      user.inbox.forEach((m: any) => { if (messageIds.includes(m.id) && !m.readBy.includes(user.id)) m.readBy.push(user.id); });
+    }
+    res.json({ ok: true });
+  });
+
+  // Chat endpoints
+  app.get("/api/chat", listConversations);
+  app.post("/api/chat", createConversation);
+  app.get("/api/chat/:id", getConversation);
+  app.post("/api/chat/send", sendMessage);
+  app.post("/api/chat/mark-read", markConversationRead);
 
   return app;
 }
