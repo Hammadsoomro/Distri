@@ -34,13 +34,13 @@ export default function Signup() {
       <Card className="bg-white/5 border-white/10 text-white">
         <CardHeader>
           <CardTitle>Admin Setup</CardTitle>
-          <CardDescription className="text-white/70">Pehla admin account yahan banayein</CardDescription>
+          <CardDescription className="text-white/70">Create the first admin account here</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
               <Label htmlFor="name" className="text-white">Name</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Aap ka naam" className="bg-white/10 text-white border-white/20 placeholder:text-white/40" required />
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="bg-white/10 text-white border-white/20 placeholder:text-white/40" required />
             </div>
             <div>
               <Label htmlFor="email" className="text-white">Email</Label>
