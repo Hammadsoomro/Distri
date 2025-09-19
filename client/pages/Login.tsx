@@ -33,7 +33,7 @@ export default function Login() {
       <Card className="bg-white/5 border-white/10 text-white">
         <CardHeader>
           <CardTitle>Login</CardTitle>
-          <CardDescription className="text-white/70">Apne account se login karein</CardDescription>
+          <CardDescription className="text-white/70">Login with your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
