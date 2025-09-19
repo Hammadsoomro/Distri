@@ -69,7 +69,7 @@ function PreviewPanel() {
       <div className="h-64 rounded bg-[linear-gradient(120deg,rgba(255,255,255,0.08),transparent)] flex items-center justify-center text-white/70">
         Distribution UI preview
       </div>
-      <p className="mt-3 text-white/60 text-sm">Login karke full distributor use karein.</p>
+      <p className="mt-3 text-white/60 text-sm">Login to use the full distributor.</p>
     </div>
   );
 }
