@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { TeamApi, ChatApi } from "@/lib/api";
 import type { PublicUser } from "@shared/api";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Team() {
