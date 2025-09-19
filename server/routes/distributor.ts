@@ -30,8 +30,8 @@ export const createJob: RequestHandler = (req, res) => {
   const areq = req as AuthedRequest;
   if (!requireUser(areq, res, "admin")) return;
   const { text, intervalSec, linesPerTick, targetIds } = req.body || {};
-  const validIntervals = [30, 40, 50];
-  const validLines = [1, 3, 5];
+  const validIntervals = [30, 60, 120, 180, 240, 300];
+  const validLines = [1, 3, 5, 7, 10, 12, 15];
   if (typeof text !== "string" || !text.trim()) return res.status(400).json({ error: "Invalid text" });
   if (!validIntervals.includes(Number(intervalSec))) return res.status(400).json({ error: "Invalid interval" });
   if (!validLines.includes(Number(linesPerTick))) return res.status(400).json({ error: "Invalid linesPerTick" });
