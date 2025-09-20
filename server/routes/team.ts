@@ -1,4 +1,5 @@
 import type { RequestHandler } from "express";
+import type { RequestHandler } from "express";
 import { db, hashPassword, newId, publicUser } from "../store";
 import { requireUser, AuthedRequest } from "../auth";
 
