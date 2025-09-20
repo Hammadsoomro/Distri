@@ -1,41 +1,39 @@
 import {
   AuthResponse,
   CreateJobRequest,
-  CreateMemberRequest,
   InboxResponse,
   JobResponse,
   JobsListResponse,
   PublicUser,
   TeamListResponse,
+  ConversationsListResponse,
+  ConversationResponse,
+  Message,
+  Conversation,
 } from "@shared/api";
 
-const tokenKey = "auth_token";
-
+// Cookie-based auth: no localStorage
 export function getToken() {
-  return localStorage.getItem(tokenKey) || "";
+  return "";
 }
-
-export function setToken(t: string) {
-  localStorage.setItem(tokenKey, t);
-}
-
-export function clearToken() {
-  localStorage.removeItem(tokenKey);
-}
+export function setToken(_t: string) {}
+export function clearToken() {}
 
 async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(init.headers as any),
   };
-  const token = getToken();
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(path, { ...init, headers });
+  const res = await fetch(path, {
+    ...init,
+    headers,
+    credentials: "same-origin",
+  });
   if (!res.ok) {
     let message = `${res.status}`;
     try {
       const data = await res.json();
-      message = data.error || message;
+      message = (data as any).error || message;
     } catch {}
     throw new Error(message);
   }
@@ -55,6 +53,9 @@ export const AuthApi = {
       body: JSON.stringify({ email, password }),
     });
   },
+  async logout() {
+    return api<{ ok: true }>("/api/auth/logout", { method: "POST" });
+  },
   async me() {
     const res = await api<{ user: PublicUser }>("/api/auth/me");
     return res.user;
@@ -65,7 +66,7 @@ export const TeamApi = {
   async list() {
     return api<TeamListResponse>("/api/team");
   },
-  async create(input: CreateMemberRequest) {
+  async create(input: { name: string; email: string; password: string }) {
     return api<{ member: PublicUser }>("/api/team", {
       method: "POST",
       body: JSON.stringify(input),
@@ -136,6 +137,33 @@ export const ChatApi = {
     return api<{ ok: true }>("/api/chat/mark-read", {
       method: "POST",
       body: JSON.stringify({ conversationId }),
+    });
+  },
+};
+
+export const UsersApi = {
+  async list() {
+    return api<TeamListResponse>("/api/users");
+  },
+};
+
+export const PresenceApi = {
+  async ping() {
+    return api<{ ok: true }>("/api/presence/ping", { method: "POST" });
+  },
+  async listOnline() {
+    return api<{ onlineIds: string[] }>("/api/presence/online");
+  },
+};
+
+export const PrefsApi = {
+  async get() {
+    return api<{ sidebarCollapsed: boolean }>("/api/prefs");
+  },
+  async save(sidebarCollapsed: boolean) {
+    return api<{ ok: true }>("/api/prefs", {
+      method: "POST",
+      body: JSON.stringify({ sidebarCollapsed }),
     });
   },
 };

@@ -38,7 +38,7 @@ export interface DistributionJob {
   textLines: string[];
   nextIndex: number; // next line index to send
   status: "running" | "completed" | "cancelled";
-  _timer?: NodeJS.Timer; // internal
+  _timer?: NodeJS.Timeout; // internal
 }
 
 export const db = {
@@ -47,6 +47,9 @@ export const db = {
   conversations: new Map<string, Conversation>(),
   messages: new Map<string, Message>(),
 };
+
+// Simple presence tracking: userId -> last seen timestamp (ms)
+export const presence = new Map<string, number>();
 
 export function hashPassword(password: string) {
   return crypto.createHash("sha256").update(password).digest("hex");

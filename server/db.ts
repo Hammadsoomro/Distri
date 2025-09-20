@@ -1,16 +1,14 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const uri = process.env.MONGO_URI;
+const uri = process.env.MONGODB_URI;
 
 export async function connectDB() {
   if (!uri) {
-    console.warn("MONGO_URI not set; skipping MongoDB connection");
+    console.warn("MONGODB_URI not set; skipping MongoDB connection");
     return;
   }
   try {
-    await mongoose.connect(uri, {
-      // useNewUrlParser etc are defaults in modern mongoose
-    } as any);
+    await mongoose.connect(uri, {} as any);
     console.log("Connected to MongoDB");
   } catch (err) {
     console.error("MongoDB connection error:", err);
@@ -53,12 +51,20 @@ const JobSchema = new Schema({
   status: { type: String, enum: ["running", "completed", "cancelled"] },
 });
 
-export const MessageModel = mongoose.model("Message", MessageSchema);
-export const ConversationModel = mongoose.model(
-  "Conversation",
-  ConversationSchema,
-);
-export const UserModel = mongoose.model("User", UserSchema);
-export const JobModel = mongoose.model("Job", JobSchema);
+const PrefsSchema = new Schema({
+  userId: { type: String, index: true, unique: true },
+  sidebarCollapsed: { type: Boolean, default: false },
+});
+
+export const MessageModel =
+  mongoose.models.Message || mongoose.model("Message", MessageSchema);
+export const ConversationModel =
+  mongoose.models.Conversation ||
+  mongoose.model("Conversation", ConversationSchema);
+export const UserModel =
+  mongoose.models.User || mongoose.model("User", UserSchema);
+export const JobModel = mongoose.models.Job || mongoose.model("Job", JobSchema);
+export const PrefsModel =
+  mongoose.models.Prefs || mongoose.model("Prefs", PrefsSchema);
 
 export default mongoose;

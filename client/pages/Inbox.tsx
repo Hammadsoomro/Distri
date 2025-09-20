@@ -16,8 +16,12 @@ export default function Inbox() {
   const [lines, setLines] = useState<Message[]>([]);
 
   const load = async () => {
-    const res = await InboxApi.get();
-    setLines(res.inbox);
+    try {
+      const res = await InboxApi.get();
+      setLines(res.inbox as any);
+    } catch (e) {
+      setLines([]);
+    }
   };
 
   useEffect(() => {
@@ -27,12 +31,16 @@ export default function Inbox() {
   }, []);
 
   const clear = async () => {
-    await InboxApi.clear();
+    try {
+      await InboxApi.clear();
+    } catch {}
     await load();
   };
 
   const markAllRead = async () => {
-    await InboxApi.markRead();
+    try {
+      await InboxApi.markRead();
+    } catch {}
     await load();
   };
 

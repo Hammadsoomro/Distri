@@ -79,8 +79,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setToken(res.token);
         setUser(res.user);
       },
-      logout() {
-        clearToken();
+      async logout() {
+        try {
+          await AuthApi.logout();
+        } catch {}
         setUser(null);
       },
       async refresh() {

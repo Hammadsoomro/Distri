@@ -44,16 +44,31 @@ export interface AuthedRequest extends Request {
   user?: User;
 }
 
+function parseCookies(header: string | undefined) {
+  const out: Record<string, string> = {};
+  if (!header) return out;
+  for (const part of header.split(";")) {
+    const [k, ...v] = part.trim().split("=");
+    if (!k) continue;
+    out[decodeURIComponent(k)] = decodeURIComponent(v.join("="));
+  }
+  return out;
+}
+
 export function authMiddleware(
   req: AuthedRequest,
   _res: Response,
   next: NextFunction,
 ) {
+  let token: string | undefined;
   const header = req.headers["authorization"] || "";
-  const token =
-    typeof header === "string" && header.startsWith("Bearer ")
-      ? header.slice(7)
-      : undefined;
+  if (typeof header === "string" && header.startsWith("Bearer ")) {
+    token = header.slice(7);
+  }
+  if (!token) {
+    const cookies = parseCookies(req.headers["cookie"] as string | undefined);
+    token = cookies["auth_token"];
+  }
   const payload = verifyToken(token);
   if (payload) {
     const u = db.users.get(payload.uid);

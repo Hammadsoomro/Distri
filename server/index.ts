@@ -4,8 +4,13 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { authMiddleware } from "./auth";
-import { adminSetup, login, me } from "./routes/auth";
-import { listTeam, createMember, deleteMember } from "./routes/team";
+import { adminSetup, login, me, logout } from "./routes/auth";
+import {
+  listTeam,
+  createMember,
+  deleteMember,
+  listMembersPublic,
+} from "./routes/team";
 import { createJob, listJobs, getJob, cancelJob } from "./routes/distributor";
 import { getInbox, clearInbox } from "./routes/inbox";
 import {
@@ -16,6 +21,8 @@ import {
   markConversationRead,
 } from "./routes/chat";
 import { connectDB } from "./db";
+import { presencePing, listOnline } from "./routes/presence";
+import { getPrefs, setPrefs } from "./routes/prefs";
 
 export function createServer() {
   const app = express();
@@ -40,12 +47,16 @@ export function createServer() {
   // Auth
   app.post("/api/auth/admin-setup", adminSetup);
   app.post("/api/auth/login", login);
+  app.post("/api/auth/logout", logout);
   app.get("/api/auth/me", me);
 
   // Team management (admin)
   app.get("/api/team", listTeam);
   app.post("/api/team", createMember);
   app.delete("/api/team/:id", deleteMember);
+
+  // Authenticated users list for contacts (public)
+  app.get("/api/users", listMembersPublic);
 
   // Distributor jobs (admin)
   app.post("/api/distribute", createJob);
@@ -82,6 +93,14 @@ export function createServer() {
   app.get("/api/chat/:id", getConversation);
   app.post("/api/chat/send", sendMessage);
   app.post("/api/chat/mark-read", markConversationRead);
+
+  // Presence endpoints
+  app.post("/api/presence/ping", presencePing);
+  app.get("/api/presence/online", listOnline);
+
+  // User preferences
+  app.get("/api/prefs", getPrefs);
+  app.post("/api/prefs", setPrefs);
 
   return app;
 }

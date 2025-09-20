@@ -41,3 +41,11 @@ export const deleteMember: RequestHandler = (req, res) => {
   db.users.delete(id);
   res.json({ ok: true });
 };
+
+export const listMembersPublic: RequestHandler = (req, res) => {
+  if (!requireUser(req as AuthedRequest, res)) return;
+  const members = Array.from(db.users.values())
+    .filter((u) => u.role === "member")
+    .map(publicUser);
+  res.json({ members });
+};
