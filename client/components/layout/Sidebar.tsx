@@ -12,12 +12,14 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
     <Link
       to={to}
       className={cn(
-        "flex items-center justify-center h-12 w-12 rounded-lg text-gray-300 hover:text-white transition",
+        "flex items-center rounded-lg text-gray-300 hover:text-white transition",
+        collapsed ? "justify-center h-12 w-12" : "gap-3 h-10 w-full px-3 justify-start",
         loc.pathname.startsWith(to) ? "bg-purple-600 text-white" : ""
       )}
       title={label}
     >
       <Icon className="h-6 w-6" />
+      {!collapsed && <span className="text-sm font-medium">{label}</span>}
     </Link>
   );
   return (
