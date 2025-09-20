@@ -59,10 +59,15 @@ export function Sidebar({
           collapsed ? "justify-center px-0" : "justify-start px-4",
         )}
       >
-        <div className="h-10 w-10 rounded-lg bg-purple-500 shadow-lg shadow-purple-500/30" />
+        <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-primary/20 text-primary shadow-lg shadow-primary/30">
+          {(() => {
+            const Logo = require("@/components/brand/Logo").TeamWorkLogo;
+            return <Logo className="h-6 w-6" />;
+          })()}
+        </div>
         {!collapsed && (
           <span className="font-extrabold tracking-tight text-sm">
-            Line Distributor
+            Team-Work
           </span>
         )}
       </div>
