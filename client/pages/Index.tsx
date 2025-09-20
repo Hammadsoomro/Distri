@@ -37,9 +37,12 @@ function DashboardHero() {
       <p className="uppercase text-xs tracking-widest text-primary-foreground/80 bg-primary/30 inline-flex px-2 py-1 rounded">
         Welcome
       </p>
-      <h2 className="mt-3 text-3xl font-extrabold">Team-Work – For your team</h2>
+      <h2 className="mt-3 text-3xl font-extrabold">
+        Team-Work – For your team
+      </h2>
       <p className="mt-2 text-white/70">
-        Per-line text distribution with smart timers. Beautiful, fast, and reliable.
+        Per-line text distribution with smart timers. Beautiful, fast, and
+        reliable.
       </p>
     </div>
   );
@@ -50,7 +53,9 @@ function PublicLanding() {
   return (
     <div className="space-y-16">
       <section className="text-center max-w-4xl mx-auto">
-        <p className="uppercase text-xs tracking-widest text-primary-foreground/80 bg-primary/30 inline-flex px-2 py-1 rounded">Team-Work</p>
+        <p className="uppercase text-xs tracking-widest text-primary-foreground/80 bg-primary/30 inline-flex px-2 py-1 rounded">
+          Team-Work
+        </p>
         <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight">
           <span className="block bg-gradient-to-r from-primary to-fuchsia-500 bg-clip-text text-transparent">
             Connect with
@@ -63,11 +68,18 @@ function PublicLanding() {
           </span>
         </h1>
         <p className="mt-5 text-white/80 text-lg">
-          Together. Faster. Better. Real-time messaging and distribution with configurable timers and team control.
+          Together. Faster. Better. Real-time messaging and distribution with
+          configurable timers and team control.
         </p>
         <div className="mt-8 flex items-center justify-center gap-3">
-          <Button onClick={() => nav("/signup")} className="px-6">Get Started</Button>
-          <Button variant="outline" onClick={() => nav("/login")} className="px-6">
+          <Button onClick={() => nav("/signup")} className="px-6">
+            Get Started
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => nav("/login")}
+            className="px-6"
+          >
             Login
           </Button>
         </div>
@@ -78,23 +90,23 @@ function PublicLanding() {
           {
             icon: <MessageSquare className="h-6 w-6 text-primary" />,
             title: "Real-time Messaging",
-            text:
-              "Instant delivery with typing indicators, read receipts, and synced across devices.",
+            text: "Instant delivery with typing indicators, read receipts, and synced across devices.",
           },
           {
             icon: <Globe className="h-6 w-6 text-primary" />,
             title: "Global Reach",
-            text:
-              "Reliable distribution to your whole team with flexible line batching.",
+            text: "Reliable distribution to your whole team with flexible line batching.",
           },
-        	{
+          {
             icon: <Shield className="h-6 w-6 text-primary" />,
             title: "Secure & Controlled",
-            text:
-              "Admin-controlled team with per-member access and audit-friendly design.",
+            text: "Admin-controlled team with per-member access and audit-friendly design.",
           },
         ].map((f) => (
-          <Card key={f.title} className="bg-white/5 border-white/10 text-white backdrop-blur">
+          <Card
+            key={f.title}
+            className="bg-white/5 border-white/10 text-white backdrop-blur"
+          >
             <CardContent className="p-5">
               <div className="flex items-start gap-3">
                 <div className="p-2 rounded bg-primary/20">{f.icon}</div>
@@ -110,8 +122,9 @@ function PublicLanding() {
 
       <section className="max-w-4xl mx-auto text-center text-white/70">
         <p>
-          Login, signup, and distributor — everything in one place. Configure timers and lines per send,
-          create team member accounts, and they will receive messages in their inbox.
+          Login, signup, and distributor — everything in one place. Configure
+          timers and lines per send, create team member accounts, and they will
+          receive messages in their inbox.
         </p>
       </section>
     </div>

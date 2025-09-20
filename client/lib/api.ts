@@ -24,7 +24,11 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     "Content-Type": "application/json",
     ...(init.headers as any),
   };
-  const res = await fetch(path, { ...init, headers, credentials: "same-origin" });
+  const res = await fetch(path, {
+    ...init,
+    headers,
+    credentials: "same-origin",
+  });
   if (!res.ok) {
     let message = `${res.status}`;
     try {
