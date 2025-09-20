@@ -50,6 +50,7 @@ function PublicLanding() {
   return (
     <div className="space-y-16">
       <section className="text-center max-w-4xl mx-auto">
+        <p className="uppercase text-xs tracking-widest text-primary-foreground/80 bg-primary/30 inline-flex px-2 py-1 rounded">Team-Work</p>
         <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight">
           <span className="block bg-gradient-to-r from-primary to-fuchsia-500 bg-clip-text text-transparent">
             Connect with
