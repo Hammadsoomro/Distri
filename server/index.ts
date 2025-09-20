@@ -4,7 +4,7 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { authMiddleware } from "./auth";
-import { adminSetup, login, me } from "./routes/auth";
+import { adminSetup, login, me, logout } from "./routes/auth";
 import {
   listTeam,
   createMember,
@@ -22,6 +22,7 @@ import {
 } from "./routes/chat";
 import { connectDB } from "./db";
 import { presencePing, listOnline } from "./routes/presence";
+import { getPrefs, setPrefs } from "./routes/prefs";
 
 export function createServer() {
   const app = express();
@@ -46,6 +47,7 @@ export function createServer() {
   // Auth
   app.post("/api/auth/admin-setup", adminSetup);
   app.post("/api/auth/login", login);
+  app.post("/api/auth/logout", logout);
   app.get("/api/auth/me", me);
 
   // Team management (admin)
@@ -95,6 +97,10 @@ export function createServer() {
   // Presence endpoints
   app.post("/api/presence/ping", presencePing);
   app.get("/api/presence/online", listOnline);
+
+  // User preferences
+  app.get("/api/prefs", getPrefs);
+  app.post("/api/prefs", setPrefs);
 
   return app;
 }

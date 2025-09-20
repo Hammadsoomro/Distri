@@ -4,19 +4,13 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { PrefsApi } from "@/lib/api";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
-  const loc = useLocation();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [unread, setUnread] = useState(0);
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem("sidebar_collapsed") === "1";
-    } catch {
-      return true;
-    }
-  });
+  const [collapsed, setCollapsed] = useState<boolean>(true);
 
   useEffect(() => {
     let t: any;
@@ -39,11 +33,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return () => clearInterval(t);
   }, [user]);
 
+  // Load and persist sidebar preference from/to server
   useEffect(() => {
-    try {
-      localStorage.setItem("sidebar_collapsed", collapsed ? "1" : "0");
-    } catch {}
-  }, [collapsed]);
+    if (!user) return;
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await PrefsApi.get();
+        if (mounted) setCollapsed(Boolean((res as any).sidebarCollapsed));
+      } catch {}
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        await PrefsApi.save(collapsed);
+      } catch {}
+    })();
+  }, [collapsed, user?.id]);
 
   if (!user) {
     return (
@@ -78,39 +90,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen gradient-animated text-white">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
-      <main
-        className={cn(
-          collapsed ? "pl-20" : "pl-64",
-          "container mx-auto px-4 py-8",
-        )}
-      >
+      <main className={cn(collapsed ? "pl-20" : "pl-64", "container mx-auto px-4 py-8")}>
         {children}
       </main>
       <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">
         © {new Date().getFullYear()} Line Distributor • Built for teams
       </footer>
     </div>
-  );
-}
-
-function NavLink({
-  to,
-  label,
-  current,
-}: {
-  to: string;
-  label: string;
-  current: boolean;
-}) {
-  return (
-    <Link
-      to={to}
-      className={cn(
-        "hover:text-white/90 transition",
-        current ? "text-white" : "text-white/70",
-      )}
-    >
-      {label}
-    </Link>
   );
 }
