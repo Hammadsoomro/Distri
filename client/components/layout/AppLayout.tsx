@@ -96,7 +96,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <main className={cn(collapsed ? "pl-20" : "pl-64", "px-4 py-8")}>
         <div className="max-w-screen-2xl mx-auto">{children}</div>
       </main>
-      <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">
+      <footer className={cn(collapsed ? "pl-20" : "pl-64", "mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm")}>
         © {new Date().getFullYear()} Team-Work • Together. Faster. Better.
       </footer>
     </div>
