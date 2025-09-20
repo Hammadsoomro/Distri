@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { Sidebar } from "@/components/layout/Sidebar";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
@@ -31,91 +32,30 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return () => clearInterval(t);
   }, [user]);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#0b1b3a] to-[#020617] text-white">
-      <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-white/5 bg-white/5 border-b border-white/10">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-primary shadow-lg shadow-primary/30" />
-            <span className="font-extrabold tracking-tight text-lg">
-              Line Distributor
-            </span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <NavLink to="/" label="Home" current={loc.pathname === "/"} />
-            {user?.role === "admin" && (
-              <>
-                <NavLink
-                  to="/team"
-                  label="Team"
-                  current={loc.pathname.startsWith("/team")}
-                />
-                <NavLink
-                  to="/distributor"
-                  label="Distributor"
-                  current={loc.pathname.startsWith("/distributor")}
-                />
-                <NavLink
-                  to="/jobs"
-                  label="Jobs"
-                  current={loc.pathname.startsWith("/jobs")}
-                />
-              </>
-            )}
-            {user && (
-              <NavLink
-                to="/chat"
-                label="Chat"
-                current={loc.pathname.startsWith("/chat")}
-              />
-            )}
-            {user && (
-              <NavLink
-                to="/inbox"
-                label={`Inbox${unread ? ` (${unread})` : ""}`}
-                current={loc.pathname.startsWith("/inbox")}
-              />
-            )}
-          </nav>
-          <div className="flex items-center gap-2">
-            {!user ? (
-              <>
-                <Button
-                  variant="ghost"
-                  className="text-white/80"
-                  onClick={() => navigate("/login")}
-                >
-                  Login
-                </Button>
-                <Button onClick={() => navigate("/signup")}>Admin Setup</Button>
-              </>
-            ) : (
-              <>
-                <span className="hidden sm:block text-white/70 text-sm mr-2">
-                  {user.name} ({user.role})
-                </span>
-                <Button
-                  variant="secondary"
-                  onClick={() => navigate("/dashboard")}
-                >
-                  Dashboard
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="text-white/80"
-                  onClick={() => {
-                    logout();
-                    navigate("/");
-                  }}
-                >
-                  Logout
-                </Button>
-              </>
-            )}
+  if (!user) {
+    return (
+      <div className="min-h-screen gradient-animated text-white">
+        <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-white/5 bg-white/5 border-b border-white/10">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-primary shadow-lg shadow-primary/30" />
+              <span className="font-extrabold tracking-tight text-lg">Line Distributor</span>
+            </Link>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" className="text-white/80" onClick={() => navigate("/login")}>Login</Button>
+              <Button onClick={() => navigate("/signup")}>Admin Setup</Button>
+            </div>
           </div>
-        </div>
-      </header>
-      <main className="container mx-auto px-4 py-8">{children}</main>
+        </header>
+        <main className="container mx-auto px-4 py-8">{children}</main>
+        <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">© {new Date().getFullYear()} Line Distributor • Built for teams</footer>
+      </div>
+    );
+  }
+  return (
+    <div className="min-h-screen gradient-animated text-white">
+      <Sidebar />
+      <main className="pl-20 container mx-auto px-4 py-8">{children}</main>
       <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">
         © {new Date().getFullYear()} Line Distributor • Built for teams
       </footer>
