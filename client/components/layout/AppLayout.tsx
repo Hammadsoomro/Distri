@@ -93,7 +93,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen gradient-animated text-white">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
-      <main className={cn(collapsed ? "pl-20" : "pl-64", "container mx-auto px-4 py-8")}>
+      <main className={cn(collapsed ? "pl-20" : "pl-64", "px-4 py-8")}>
         {children}
       </main>
       <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">
