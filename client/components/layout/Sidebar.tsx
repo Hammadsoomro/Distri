@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { LayoutGrid, Users, Network, MessageSquare, LogOut } from "lucide-react";
+import { LayoutGrid, Users, Network, MessageSquare, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const { user, logout } = useAuth();
