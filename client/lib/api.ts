@@ -139,3 +139,18 @@ export const ChatApi = {
     });
   },
 };
+
+export const UsersApi = {
+  async list() {
+    return api<TeamListResponse>("/api/users");
+  },
+};
+
+export const PresenceApi = {
+  async ping() {
+    return api<{ ok: true }>("/api/presence/ping", { method: "POST" });
+  },
+  async listOnline() {
+    return api<{ onlineIds: string[] }>("/api/presence/online");
+  },
+};

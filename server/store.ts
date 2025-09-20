@@ -48,6 +48,9 @@ export const db = {
   messages: new Map<string, Message>(),
 };
 
+// Simple presence tracking: userId -> last seen timestamp (ms)
+export const presence = new Map<string, number>();
+
 export function hashPassword(password: string) {
   return crypto.createHash("sha256").update(password).digest("hex");
 }

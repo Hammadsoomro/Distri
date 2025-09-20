@@ -1,4 +1,5 @@
 import type { RequestHandler } from "express";
+import type { RequestHandler } from "express";
 import { db, hashPassword, newId, publicUser } from "../store";
 import { requireUser, AuthedRequest } from "../auth";
 
@@ -40,4 +41,12 @@ export const deleteMember: RequestHandler = (req, res) => {
     return res.status(404).json({ error: "Not found" });
   db.users.delete(id);
   res.json({ ok: true });
+};
+
+export const listMembersPublic: RequestHandler = (req, res) => {
+  if (!requireUser(req as AuthedRequest, res)) return;
+  const members = Array.from(db.users.values())
+    .filter((u) => u.role === "member")
+    .map(publicUser);
+  res.json({ members });
 };
