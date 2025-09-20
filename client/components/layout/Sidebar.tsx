@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { TeamWorkLogo } from "@/components/brand/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import {
@@ -60,10 +61,7 @@ export function Sidebar({
         )}
       >
         <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-primary/20 text-primary shadow-lg shadow-primary/30">
-          {(() => {
-            const Logo = require("@/components/brand/Logo").TeamWorkLogo;
-            return <Logo className="h-6 w-6" />;
-          })()}
+          <TeamWorkLogo className="h-6 w-6" />
         </div>
         {!collapsed && (
           <span className="font-extrabold tracking-tight text-sm">
