@@ -60,9 +60,9 @@ export default function Dashboard() {
         <StatCard
           title="Total Lines Distributed"
           value={totalDistributed.toString()}
-          icon={<Database className="h-8 w-8 text-blue-400" />}
-          gradient="from-blue-500/20 to-cyan-500/20"
-          border="border-blue-400/30"
+          icon={<Database className="h-8 w-8 text-purple-400" />}
+          gradient="from-purple-500/20 to-indigo-500/20"
+          border="border-purple-400/30"
         />
         <StatCard
           title="Distribution Status"
@@ -84,7 +84,7 @@ export default function Dashboard() {
         <Card className="bg-white/5 border-white/10 text-white backdrop-blur supports-[backdrop-filter]:bg-white/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
-              <Users className="h-6 w-6 text-blue-400" /> Team Distribution
+              <Users className="h-6 w-6 text-purple-400" /> Team Distribution
               Stats
             </CardTitle>
           </CardHeader>
