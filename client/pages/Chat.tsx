@@ -97,7 +97,7 @@ export default function ChatPage() {
   return (
     <div className="flex h-[70vh] rounded-lg overflow-hidden border border-white/10 bg-white/5">
       {/* Left conversations list */}
-      <div className="w-1/3 border-right border-white/10 bg-white/5 p-4 flex flex-col">
+      <div className="w-1/3 border-r border-white/10 bg-white/5 p-4 flex flex-col">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold">Chats</h2>
           <Button size="sm" onClick={startGroup}>New Group</Button>
