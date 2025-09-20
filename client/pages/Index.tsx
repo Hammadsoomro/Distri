@@ -37,7 +37,7 @@ function DashboardHero() {
       <p className="uppercase text-xs tracking-widest text-primary-foreground/80 bg-primary/30 inline-flex px-2 py-1 rounded">
         Welcome
       </p>
-      <h2 className="mt-3 text-3xl font-extrabold">Line Distributor – For your team</h2>
+      <h2 className="mt-3 text-3xl font-extrabold">Team-Work – For your team</h2>
       <p className="mt-2 text-white/70">
         Per-line text distribution with smart timers. Beautiful, fast, and reliable.
       </p>
