@@ -38,7 +38,7 @@ export interface DistributionJob {
   textLines: string[];
   nextIndex: number; // next line index to send
   status: "running" | "completed" | "cancelled";
-  _timer?: NodeJS.Timer; // internal
+  _timer?: NodeJS.Timeout; // internal
 }
 
 export const db = {
