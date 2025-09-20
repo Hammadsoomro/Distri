@@ -6,7 +6,7 @@ export const getPrefs: RequestHandler = async (req, res) => {
   const anyReq = req as any;
   if (!requireUser(anyReq, res)) return;
   const userId = anyReq.user!.id;
-  const doc = await PrefsModel.findOne({ userId }).lean().exec();
+  const doc: any = await PrefsModel.findOne({ userId }).lean().exec();
   res.json({ sidebarCollapsed: Boolean(doc?.sidebarCollapsed) });
 };
 
