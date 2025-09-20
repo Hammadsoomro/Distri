@@ -24,6 +24,7 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
     <aside className={cn("fixed left-0 top-0 h-screen flex flex-col justify-between py-4 bg-gradient-to-b from-indigo-900 to-slate-900 border-r border-white/10", collapsed ? "items-center w-20" : "items-stretch w-64")}>
       <div className={cn("flex items-center gap-3", collapsed ? "justify-center px-0" : "justify-start px-4")}>
         <div className="h-10 w-10 rounded-lg bg-purple-500 shadow-lg shadow-purple-500/30" />
+        {!collapsed && <span className="font-extrabold tracking-tight text-sm">Line Distributor</span>}
       </div>
       <nav className={cn("flex-1 flex flex-col gap-2 mt-4", collapsed ? "items-center" : "items-stretch px-2")}>
         <Item to="/dashboard" icon={LayoutGrid} label="Dashboard" />
