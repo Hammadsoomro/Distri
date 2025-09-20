@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { PrefsApi } from "@/lib/api";
+import { TeamWorkLogo } from "@/components/brand/Logo";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -64,11 +65,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
               <div className="h-8 w-8 text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.35)]">
-                {/** Brand logo */}
-                {(() => {
-                  const Logo = require("@/components/brand/Logo").TeamWorkLogo;
-                  return <Logo className="h-8 w-8" />;
-                })()}
+                <TeamWorkLogo className="h-8 w-8" />
               </div>
               <span className="font-extrabold tracking-tight text-lg">
                 Team-Work
@@ -100,7 +97,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">
-        © {new Date().getFullYear()} Line Distributor • Built for teams
+        © {new Date().getFullYear()} Team-Work • Together. Faster. Better.
       </footer>
     </div>
   );
