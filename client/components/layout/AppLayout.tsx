@@ -63,9 +63,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-white/5 bg-white/5 border-b border-white/10">
           <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-primary shadow-lg shadow-primary/30" />
+              <div className="h-8 w-8 text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.35)]">
+                {/** Brand logo */}
+                {(() => {
+                  const Logo = require("@/components/brand/Logo").TeamWorkLogo;
+                  return <Logo className="h-8 w-8" />;
+                })()}
+              </div>
               <span className="font-extrabold tracking-tight text-lg">
-                Line Distributor
+                Team-Work
               </span>
             </Link>
             <div className="flex items-center gap-2">
@@ -82,7 +88,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
         <main className="container mx-auto px-4 py-8">{children}</main>
         <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">
-          © {new Date().getFullYear()} Line Distributor • Built for teams
+          © {new Date().getFullYear()} Team-Work • Together. Faster. Better.
         </footer>
       </div>
     );
