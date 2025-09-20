@@ -96,9 +96,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </span>
                 <Button
                   variant="secondary"
-                  onClick={() =>
-                    navigate(user.role === "admin" ? "/distributor" : "/inbox")
-                  }
+                  onClick={() => navigate("/dashboard")}
                 >
                   Dashboard
                 </Button>
