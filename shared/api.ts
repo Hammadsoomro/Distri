@@ -107,5 +107,5 @@ export interface JobResponse {
 }
 
 export interface InboxResponse {
-  inbox: string[];
+  inbox: Message[];
 }
