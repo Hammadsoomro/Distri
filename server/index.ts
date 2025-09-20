@@ -5,7 +5,12 @@ import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { authMiddleware } from "./auth";
 import { adminSetup, login, me } from "./routes/auth";
-import { listTeam, createMember, deleteMember, listMembersPublic } from "./routes/team";
+import {
+  listTeam,
+  createMember,
+  deleteMember,
+  listMembersPublic,
+} from "./routes/team";
 import { createJob, listJobs, getJob, cancelJob } from "./routes/distributor";
 import { getInbox, clearInbox } from "./routes/inbox";
 import {

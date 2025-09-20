@@ -52,23 +52,40 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-primary shadow-lg shadow-primary/30" />
-              <span className="font-extrabold tracking-tight text-lg">Line Distributor</span>
+              <span className="font-extrabold tracking-tight text-lg">
+                Line Distributor
+              </span>
             </Link>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" className="text-white/80" onClick={() => navigate("/login")}>Login</Button>
+              <Button
+                variant="ghost"
+                className="text-white/80"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
               <Button onClick={() => navigate("/signup")}>Admin Setup</Button>
             </div>
           </div>
         </header>
         <main className="container mx-auto px-4 py-8">{children}</main>
-        <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">© {new Date().getFullYear()} Line Distributor • Built for teams</footer>
+        <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">
+          © {new Date().getFullYear()} Line Distributor • Built for teams
+        </footer>
       </div>
     );
   }
   return (
     <div className="min-h-screen gradient-animated text-white">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
-      <main className={cn(collapsed ? "pl-20" : "pl-64", "container mx-auto px-4 py-8")}>{children}</main>
+      <main
+        className={cn(
+          collapsed ? "pl-20" : "pl-64",
+          "container mx-auto px-4 py-8",
+        )}
+      >
+        {children}
+      </main>
       <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">
         © {new Date().getFullYear()} Line Distributor • Built for teams
       </footer>

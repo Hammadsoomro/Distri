@@ -10,7 +10,10 @@ export default function Dashboard() {
 
   const load = async () => {
     try {
-      const [teamRes, jobsRes] = await Promise.all([TeamApi.list(), DistributorApi.listJobs()]);
+      const [teamRes, jobsRes] = await Promise.all([
+        TeamApi.list(),
+        DistributorApi.listJobs(),
+      ]);
       setMembers(teamRes.members);
       setJobs(jobsRes.jobs);
     } catch {}
@@ -22,10 +25,16 @@ export default function Dashboard() {
     return () => clearInterval(t);
   }, []);
 
-  const runningJob = useMemo(() => jobs.find((j) => j.status === "running") || null, [jobs]);
+  const runningJob = useMemo(
+    () => jobs.find((j) => j.status === "running") || null,
+    [jobs],
+  );
   const totalDistributed = useMemo(() => {
     // Sum lines already sent (nextIndex is the next to send)
-    return jobs.reduce((sum, j) => sum + Math.min(j.nextIndex, j.textLines.length), 0);
+    return jobs.reduce(
+      (sum, j) => sum + Math.min(j.nextIndex, j.textLines.length),
+      0,
+    );
   }, [jobs]);
 
   return (
@@ -35,7 +44,9 @@ export default function Dashboard() {
           <Database className="h-10 w-10 text-purple-400" />
           Dashboard Overview
         </h1>
-        <p className="text-purple-100/80">A high-level summary of your team's data distribution.</p>
+        <p className="text-purple-100/80">
+          A high-level summary of your team's data distribution.
+        </p>
       </header>
 
       <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -73,27 +84,42 @@ export default function Dashboard() {
         <Card className="bg-white/5 border-white/10 text-white backdrop-blur supports-[backdrop-filter]:bg-white/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
-              <Users className="h-6 w-6 text-blue-400" /> Team Distribution Stats
+              <Users className="h-6 w-6 text-blue-400" /> Team Distribution
+              Stats
             </CardTitle>
           </CardHeader>
           <CardContent>
             {members.length === 0 || !runningJob ? (
               <div className="text-center py-12 text-white/70">
                 <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-lg text-gray-300">No team members on the distribution list</p>
-                <p className="text-gray-400">Add members from the Team page to start distributing data</p>
+                <p className="text-lg text-gray-300">
+                  No team members on the distribution list
+                </p>
+                <p className="text-gray-400">
+                  Add members from the Team page to start distributing data
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
                 <p className="text-white/80">
-                  Currently distributing to <span className="font-semibold">{runningJob.targets.length}</span> team member{runningJob.targets.length === 1 ? "" : "s"}.
+                  Currently distributing to{" "}
+                  <span className="font-semibold">
+                    {runningJob.targets.length}
+                  </span>{" "}
+                  team member{runningJob.targets.length === 1 ? "" : "s"}.
                 </p>
                 <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {members
                     .filter((m) => runningJob.targets.includes(m.id))
                     .map((m) => (
-                      <li key={m.id} className="p-2 rounded bg-white/5 border border-white/10 flex items-center justify-between">
-                        <span>{m.name} <span className="text-white/60">({m.email})</span></span>
+                      <li
+                        key={m.id}
+                        className="p-2 rounded bg-white/5 border border-white/10 flex items-center justify-between"
+                      >
+                        <span>
+                          {m.name}{" "}
+                          <span className="text-white/60">({m.email})</span>
+                        </span>
                       </li>
                     ))}
                 </ul>
