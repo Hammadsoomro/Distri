@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChatApi } from "@/lib/api";
+import { ChatApi, PresenceApi, UsersApi } from "@/lib/api";
 import type { ConversationSummary, Message } from "@shared/api";
 import { useNavigate, useParams } from "react-router-dom";
 
