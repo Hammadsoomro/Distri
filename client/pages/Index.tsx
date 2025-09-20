@@ -63,8 +63,7 @@ function PublicLanding() {
           </span>
         </h1>
         <p className="mt-5 text-white/80 text-lg">
-          Professional messaging and distribution platform with real-time inbox,
-          configurable timers, and team management.
+          Together. Faster. Better. Real-time messaging and distribution with configurable timers and team control.
         </p>
         <div className="mt-8 flex items-center justify-center gap-3">
           <Button onClick={() => nav("/signup")} className="px-6">Get Started</Button>
