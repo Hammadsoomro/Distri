@@ -58,9 +58,20 @@ export default function Inbox() {
         </div>
         <div className="space-y-2 max-h-[60vh] overflow-auto pr-2">
           {lines.map((l) => (
-            <div
+            <button
               key={l.id}
-              className={`p-2 rounded bg-white/5 border border-white/10 flex justify-between items-start ${l.readBy.includes(user?.id || "") ? "opacity-60" : ""}`}
+              onClick={async () => {
+                // optimistic update
+                const uid = user?.id || "";
+                setLines((prev) => prev.map((m) => (m.id === l.id ? { ...m, readBy: m.readBy.includes(uid) ? m.readBy : [...m.readBy, uid] } : m)));
+                try {
+                  await InboxApi.markRead([l.id]);
+                } catch {
+                  // reload on failure
+                  await load();
+                }
+              }}
+              className={`w-full text-left p-2 rounded bg-white/5 border border-white/10 flex justify-between items-start ${l.readBy.includes(user?.id || "") ? "opacity-60" : ""}`}
             >
               <div>
                 <div className="text-sm text-white/80">
@@ -78,7 +89,7 @@ export default function Inbox() {
                   </span>
                 )}
               </div>
-            </div>
+            </button>
           ))}
           {lines.length === 0 && (
             <p className="text-white/60">No messages yet.</p>
