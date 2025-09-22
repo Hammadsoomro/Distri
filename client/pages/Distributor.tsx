@@ -187,7 +187,7 @@ export default function Distributor() {
         r.index.toString() === q ||
         r.status.toLowerCase().includes(q),
     );
-  }, [job, memberById, search]);
+  }, [job, memberById, search, historyJobs]);
 
   return (
     <div className="space-y-6">
