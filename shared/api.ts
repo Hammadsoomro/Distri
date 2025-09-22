@@ -80,6 +80,14 @@ export interface CreateMemberRequest {
   password: string;
 }
 
+export interface QueueItem {
+  lineNumber: number;
+  line: string;
+  userId: string;
+  status: "sent" | "pending" | "failed";
+  sentAt?: number;
+}
+
 export interface Job {
   id: string;
   ownerId: string;
@@ -90,6 +98,7 @@ export interface Job {
   textLines: string[];
   nextIndex: number;
   status: "running" | "completed" | "cancelled";
+  queue?: QueueItem[];
 }
 
 export interface CreateJobRequest {
