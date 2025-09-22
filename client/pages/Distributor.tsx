@@ -156,94 +156,92 @@ export default function Distributor() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!job || job.status !== "running" ? (
-            <>
+          {job && job.status === "running" && (
+            <div className="flex items-center justify-between rounded border border-white/10 bg-white/5 p-3">
               <div>
-                <Label className="text-white">
-                  Text (each line will be sent separately)
-                </Label>
-                <Textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  rows={10}
-                  className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
-                  placeholder={
-                    "Write lines here...\nEach line will be sent as a separate message."
-                  }
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-white mb-2 block">Timer (sec)</Label>
-                  <div className="flex gap-2 flex-wrap">
-                    {intervalOptions.map((s) => (
-                      <Button
-                        key={s}
-                        type="button"
-                        variant={intervalSec === s ? "default" : "secondary"}
-                        onClick={() => setIntervalSec(s as any)}
-                      >
-                        {s}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-white mb-2 block">Lines per send</Label>
-                  <div className="flex gap-2 flex-wrap">
-                    {lineOptions.map((s) => (
-                      <Button
-                        key={s}
-                        type="button"
-                        variant={linesPerTick === s ? "default" : "secondary"}
-                        onClick={() => setLinesPerTick(s as any)}
-                      >
-                        {s}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div>
-                <Label className="text-white mb-2 block">Recipients (Team)</Label>
-                <div className="grid sm:grid-cols-2 gap-2">
-                  {members.map((m) => (
-                    <label
-                      key={m.id}
-                      className="flex items-center gap-2 p-2 rounded bg-white/5 border border-white/10"
-                    >
-                      <Checkbox
-                        checked={!!selected[m.id]}
-                        onCheckedChange={() => toggle(m.id)}
-                      />
-                      <span>
-                        {m.name} <span className="text-white/60">({m.email})</span>
-                      </span>
-                    </label>
-                  ))}
-                  {members.length === 0 && (
-                    <p className="text-white/60">Add team members first.</p>
-                  )}
-                </div>
-              </div>
-              {error && <p className="text-red-400 text-sm">{error}</p>}
-              <Button
-                type="button"
-                onClick={start}
-                disabled={!text.trim() || !Object.values(selected).some(Boolean)}
-              >
-                Start
-              </Button>
-            </>
-          ) : (
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Job started • {job.linesPerTick} lines • {job.intervalSec}s</p>
-                <p className="text-white/60 text-sm">Queue is shown below.</p>
+                <p className="font-medium">Job running • {job.linesPerTick} lines • {job.intervalSec}s</p>
+                <p className="text-white/60 text-sm">You can start another job while this runs. Queue is below.</p>
               </div>
               <Button variant="destructive" onClick={() => cancel(job.id)}>Cancel</Button>
             </div>
           )}
+
+          <div>
+            <Label className="text-white">
+              Text (each line will be sent separately)
+            </Label>
+            <Textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={10}
+              className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
+              placeholder={
+                "Write lines here...\nEach line will be sent as a separate message."
+              }
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-white mb-2 block">Timer (sec)</Label>
+              <div className="flex gap-2 flex-wrap">
+                {intervalOptions.map((s) => (
+                  <Button
+                    key={s}
+                    type="button"
+                    variant={intervalSec === s ? "default" : "secondary"}
+                    onClick={() => setIntervalSec(s as any)}
+                  >
+                    {s}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="text-white mb-2 block">Lines per send</Label>
+              <div className="flex gap-2 flex-wrap">
+                {lineOptions.map((s) => (
+                  <Button
+                    key={s}
+                    type="button"
+                    variant={linesPerTick === s ? "default" : "secondary"}
+                    onClick={() => setLinesPerTick(s as any)}
+                  >
+                    {s}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div>
+            <Label className="text-white mb-2 block">Recipients (Team)</Label>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {members.map((m) => (
+                <label
+                  key={m.id}
+                  className="flex items-center gap-2 p-2 rounded bg-white/5 border border-white/10"
+                >
+                  <Checkbox
+                    checked={!!selected[m.id]}
+                    onCheckedChange={() => toggle(m.id)}
+                  />
+                  <span>
+                    {m.name} <span className="text-white/60">({m.email})</span>
+                  </span>
+                </label>
+              ))}
+              {members.length === 0 && (
+                <p className="text-white/60">Add team members first.</p>
+              )}
+            </div>
+          </div>
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <Button
+            type="button"
+            onClick={start}
+            disabled={!text.trim() || !Object.values(selected).some(Boolean)}
+          >
+            Start
+          </Button>
         </CardContent>
       </Card>
 
