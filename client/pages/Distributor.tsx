@@ -99,25 +99,42 @@ export default function Distributor() {
       userLabel: string;
       status: "sent" | "pending" | "failed";
     }[];
-    const T = job.targets.length || 1;
-    const L = job.linesPerTick;
-    const round = T * L;
-    const rows: {
+
+    let rows: {
       index: number;
       line: string;
       userId: string;
       userLabel: string;
       status: "sent" | "pending" | "failed";
     }[] = [];
-    for (let i = 0; i < job.textLines.length; i++) {
-      const inRound = i % round;
-      const targetIdx = Math.floor(inRound / L);
-      const userId = job.targets[targetIdx] || job.targets[0];
-      const m = memberById[userId];
-      const userLabel = m ? `${m.name} (${m.email})` : userId;
-      const status = i < job.nextIndex ? "sent" : "pending";
-      rows.push({ index: i + 1, line: job.textLines[i], userId, userLabel, status });
+
+    if (job.queue && job.queue.length) {
+      rows = job.queue.map((q) => {
+        const m = memberById[q.userId];
+        const userLabel = m ? `${m.name} (${m.email})` : q.userId;
+        return {
+          index: q.lineNumber,
+          line: q.line,
+          userId: q.userId,
+          userLabel,
+          status: q.status,
+        };
+      });
+    } else {
+      const T = job.targets.length || 1;
+      const L = job.linesPerTick;
+      const round = T * L;
+      for (let i = 0; i < job.textLines.length; i++) {
+        const inRound = i % round;
+        const targetIdx = Math.floor(inRound / L);
+        const userId = job.targets[targetIdx] || job.targets[0];
+        const m = memberById[userId];
+        const userLabel = m ? `${m.name} (${m.email})` : userId;
+        const status = i < job.nextIndex ? "sent" : "pending";
+        rows.push({ index: i + 1, line: job.textLines[i], userId, userLabel, status });
+      }
     }
+
     const q = search.trim().toLowerCase();
     if (!q) return rows;
     return rows.filter(
