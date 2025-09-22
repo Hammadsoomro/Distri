@@ -1,19 +1,61 @@
 import type { RequestHandler } from "express";
 import { AuthedRequest, requireUser } from "../auth";
 import { db, DistributionJob, newId } from "../store";
+import { JobModel } from "../db";
+
+function computeQueue(ownerJob: DistributionJob) {
+  const queue: { lineNumber: number; line: string; userId: string; status: "sent" | "pending" | "failed"; sentAt?: number }[] = [];
+  const T = ownerJob.targets.length || 1;
+  const L = ownerJob.linesPerTick;
+  const round = T * L;
+  for (let i = 0; i < ownerJob.textLines.length; i++) {
+    const inRound = i % round;
+    const targetIdx = Math.floor(inRound / L);
+    const userId = ownerJob.targets[targetIdx] || ownerJob.targets[0];
+    queue.push({ lineNumber: i + 1, line: ownerJob.textLines[i], userId, status: "pending" });
+  }
+  return queue;
+}
+
+async function persistProgress(job: DistributionJob, beforeIndex: number) {
+  try {
+    const afterIndex = job.nextIndex; // 0-based count of lines sent so far
+    await JobModel.updateOne(
+      { jobId: job.id },
+      {
+        $set: {
+          nextIndex: job.nextIndex,
+          status: job.status,
+        },
+        $currentDate: {},
+      },
+    ).exec();
+    if (afterIndex > 0 && afterIndex > beforeIndex) {
+      await JobModel.updateOne(
+        { jobId: job.id },
+        {
+          $set: { "queue.$[e].status": "sent", "queue.$[e].sentAt": Date.now() },
+        },
+        { arrayFilters: [{ "e.lineNumber": { $lte: afterIndex } }] as any },
+      ).exec();
+    }
+  } catch {}
+}
 
 function startTimer(job: DistributionJob) {
-  const tick = () => {
+  const tick = async () => {
     if (job.status !== "running") return;
     const linesToSend = job.linesPerTick;
     if (job.nextIndex >= job.textLines.length) {
-      // All lines sent
       job.status = "completed";
       if (job._timer) clearInterval(job._timer);
       job._timer = undefined as any;
+      try {
+        await JobModel.updateOne({ jobId: job.id }, { $set: { status: job.status } }).exec();
+      } catch {}
       return;
     }
-    // For each target, send up to linesToSend lines sequentially
+    const before = job.nextIndex;
     for (const targetId of job.targets) {
       const target = db.users.get(targetId);
       if (!target) continue;
@@ -36,11 +78,12 @@ function startTimer(job: DistributionJob) {
         db.messages.set(msgId, msg);
       }
     }
+    await persistProgress(job, before);
   };
   job._timer = setInterval(tick, job.intervalSec * 1000);
 }
 
-export const createJob: RequestHandler = (req, res) => {
+export const createJob: RequestHandler = async (req, res) => {
   const areq = req as AuthedRequest;
   if (!requireUser(areq, res, "admin")) return;
   const { text, intervalSec, linesPerTick, targetIds } = req.body || {};
@@ -68,6 +111,21 @@ export const createJob: RequestHandler = (req, res) => {
     status: "running",
   };
   db.jobs.set(id, job);
+  try {
+    const queue = computeQueue(job);
+    await JobModel.create({
+      jobId: id,
+      ownerId: job.ownerId,
+      createdAt: job.createdAt,
+      intervalSec: job.intervalSec,
+      linesPerTick: job.linesPerTick,
+      targets: job.targets,
+      textLines: job.textLines,
+      nextIndex: job.nextIndex,
+      status: job.status,
+      queue,
+    });
+  } catch {}
   startTimer(job);
   res.json({ job: { ...job, _timer: undefined } });
 };
@@ -81,17 +139,22 @@ export const listJobs: RequestHandler = (req, res) => {
   res.json({ jobs });
 };
 
-export const getJob: RequestHandler = (req, res) => {
+export const getJob: RequestHandler = async (req, res) => {
   const areq = req as AuthedRequest;
   if (!requireUser(areq, res, "admin")) return;
   const { id } = req.params;
   const job = id ? db.jobs.get(id) : undefined;
   if (!job || job.ownerId !== areq.user!.id)
     return res.status(404).json({ error: "Not found" });
-  res.json({ job: { ...job, _timer: undefined } });
+  let queue: any[] | undefined;
+  try {
+    const doc = await JobModel.findOne({ jobId: job.id }).lean();
+    queue = doc?.queue as any[] | undefined;
+  } catch {}
+  res.json({ job: { ...job, _timer: undefined, queue } });
 };
 
-export const cancelJob: RequestHandler = (req, res) => {
+export const cancelJob: RequestHandler = async (req, res) => {
   const areq = req as AuthedRequest;
   if (!requireUser(areq, res, "admin")) return;
   const { id } = req.params;
@@ -101,5 +164,8 @@ export const cancelJob: RequestHandler = (req, res) => {
   if (job._timer) clearInterval(job._timer);
   job.status = "cancelled";
   job._timer = undefined as any;
+  try {
+    await JobModel.updateOne({ jobId: job.id }, { $set: { status: job.status, nextIndex: job.nextIndex } }).exec();
+  } catch {}
   res.json({ job: { ...job, _timer: undefined } });
 };
