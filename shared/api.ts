@@ -115,6 +115,10 @@ export interface JobResponse {
   job: Job;
 }
 
+export interface JobQueueHistoryResponse {
+  jobs: { id: string; status: Job["status"]; queue: QueueItem[] }[];
+}
+
 export interface InboxResponse {
   inbox: string[];
 }

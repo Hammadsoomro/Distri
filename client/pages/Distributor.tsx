@@ -35,6 +35,7 @@ export default function Distributor() {
   const [job, setJob] = useState<Job | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [historyJobs, setHistoryJobs] = useState<{ id: string; status: Job["status"]; queue: { lineNumber: number; line: string; userId: string; status: "sent" | "pending" | "failed"; }[] }[]>([]);
 
   const loadMembers = async () => {
     const res = await TeamApi.list();
@@ -49,6 +50,15 @@ export default function Distributor() {
   useEffect(() => {
     loadMembers();
     loadRunningJob();
+    const loadHistory = async () => {
+      try {
+        const res = await DistributorApi.listQueues();
+        setHistoryJobs(res.jobs);
+      } catch {}
+    };
+    loadHistory();
+    const t = setInterval(loadHistory, 3000);
+    return () => clearInterval(t);
   }, []);
 
   useEffect(() => {
@@ -114,7 +124,7 @@ export default function Distributor() {
   }, [rawInput]);
 
   const queueRows = useMemo(() => {
-    if (!job) return [] as {
+    if (!job && (!historyJobs || historyJobs.length === 0)) return [] as {
       index: number;
       line: string;
       userId: string;
@@ -130,7 +140,7 @@ export default function Distributor() {
       status: "sent" | "pending" | "failed";
     }[] = [];
 
-    if (job.queue && job.queue.length) {
+    if (job?.queue && job.queue.length) {
       rows = job.queue.map((q) => {
         const m = memberById[q.userId];
         const userLabel = m ? `${m.name} (${m.email})` : q.userId;
@@ -142,7 +152,7 @@ export default function Distributor() {
           status: q.status,
         };
       });
-    } else {
+    } else if (job) {
       const T = job.targets.length || 1;
       const L = job.linesPerTick;
       const round = T * L;
@@ -154,6 +164,17 @@ export default function Distributor() {
         const userLabel = m ? `${m.name} (${m.email})` : userId;
         const status = i < job.nextIndex ? "sent" : "pending";
         rows.push({ index: i + 1, line: job.textLines[i], userId, userLabel, status });
+      }
+    }
+
+    // Append previous jobs' queues
+    const excludeId = job?.id;
+    for (const hj of historyJobs) {
+      if (excludeId && hj.id === excludeId) continue;
+      for (const q of hj.queue || []) {
+        const m = memberById[q.userId];
+        const userLabel = m ? `${m.name} (${m.email})` : q.userId;
+        rows.push({ index: q.lineNumber, line: q.line, userId: q.userId, userLabel, status: q.status });
       }
     }
 

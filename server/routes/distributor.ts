@@ -169,3 +169,17 @@ export const cancelJob: RequestHandler = async (req, res) => {
   } catch {}
   res.json({ job: { ...job, _timer: undefined } });
 };
+
+export const listQueues: RequestHandler = async (req, res) => {
+  const areq = req as AuthedRequest;
+  if (!requireUser(areq, res, "admin")) return;
+  try {
+    const docs = await JobModel.find({ ownerId: areq.user!.id })
+      .sort({ createdAt: -1 })
+      .lean();
+    const jobs = docs.map((d: any) => ({ id: d.jobId, status: d.status, queue: d.queue || [] }));
+    res.json({ jobs });
+  } catch (e) {
+    res.status(500).json({ error: "Failed to load queues" });
+  }
+};

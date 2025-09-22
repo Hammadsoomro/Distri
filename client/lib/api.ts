@@ -7,6 +7,7 @@ import {
   JobsListResponse,
   PublicUser,
   TeamListResponse,
+  JobQueueHistoryResponse,
 } from "@shared/api";
 
 const tokenKey = "auth_token";
@@ -91,6 +92,9 @@ export const DistributorApi = {
   },
   async cancelJob(id: string) {
     return api<JobResponse>(`/api/jobs/${id}/cancel`, { method: "POST" });
+  },
+  async listQueues() {
+    return api<JobQueueHistoryResponse>("/api/jobs/history");
   },
 };
 
