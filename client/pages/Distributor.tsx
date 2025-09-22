@@ -24,7 +24,7 @@ import type { PublicUser, Job } from "@shared/api";
 
 export default function Distributor() {
   const [members, setMembers] = useState<PublicUser[]>([]);
-  const [text, setText] = useState("");
+  const [rawInput, setRawInput] = useState("");
   const intervalOptions = [30, 60, 120, 180, 240, 300] as const;
   const lineOptions = [1, 3, 5, 7, 10, 12, 15] as const;
   const [intervalSec, setIntervalSec] =
@@ -65,13 +65,13 @@ export default function Distributor() {
     try {
       const targetIds = Object.keys(selected).filter((k) => selected[k]);
       const res = await DistributorApi.createJob({
-        text,
+        text: dedupText,
         intervalSec,
         linesPerTick,
         targetIds,
       });
       setJob(res.job);
-      setText("");
+      setRawInput("");
     } catch (e: any) {
       setError(e.message || "Failed to start job");
     }
@@ -90,6 +90,28 @@ export default function Distributor() {
     for (const m of members) map[m.id] = m;
     return map;
   }, [members]);
+
+  const dedupText = useMemo(() => {
+    const lines = rawInput.replace(/\r\n/g, "\n").split("\n");
+    const seen = new Set<string>();
+    const kept: string[] = [];
+    for (const raw of lines) {
+      const trimmed = raw.trim();
+      if (!trimmed) continue;
+      const words = trimmed
+        .replace(/[\t]+/g, " ")
+        .split(/\s+/)
+        .slice(0, 15)
+        .map((w) => w.replace(/^[^\w]+|[^\w]+$/g, "").toLowerCase())
+        .filter(Boolean);
+      const key = words.join(" ");
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        kept.push(trimmed);
+      }
+    }
+    return kept.join("\n");
+  }, [rawInput]);
 
   const queueRows = useMemo(() => {
     if (!job) return [] as {
@@ -150,6 +172,30 @@ export default function Distributor() {
     <div className="space-y-6">
       <Card className="bg-white/5 border-white/10 text-white">
         <CardHeader>
+          <CardTitle>De-Duplication</CardTitle>
+          <CardDescription className="text-white/70">
+            Paste lines here. If first 15 words match, duplicates are removed live.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label className="text-white">Input</Label>
+            <Textarea
+              value={rawInput}
+              onChange={(e) => setRawInput(e.target.value)}
+              rows={8}
+              className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
+              placeholder={"Paste or type lines here for de-duplication"}
+            />
+          </div>
+          <div className="text-sm text-white/70">
+            Kept lines: {dedupText ? dedupText.split("\n").length : 0}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/5 border-white/10 text-white">
+        <CardHeader>
           <CardTitle>Distributor</CardTitle>
           <CardDescription className="text-white/70">
             Set timer and lines-per-send
@@ -171,13 +217,10 @@ export default function Distributor() {
               Text (each line will be sent separately)
             </Label>
             <Textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
+              value={dedupText}
+              readOnly
               rows={10}
-              className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
-              placeholder={
-                "Write lines here...\nEach line will be sent as a separate message."
-              }
+              className="bg-white/10 text-white border-white/20"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -238,7 +281,7 @@ export default function Distributor() {
           <Button
             type="button"
             onClick={start}
-            disabled={!text.trim() || !Object.values(selected).some(Boolean)}
+            disabled={!dedupText.trim() || !Object.values(selected).some(Boolean)}
           >
             Start
           </Button>
