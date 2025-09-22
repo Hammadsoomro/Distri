@@ -25,6 +25,8 @@ import type { PublicUser, Job } from "@shared/api";
 export default function Distributor() {
   const [members, setMembers] = useState<PublicUser[]>([]);
   const [rawInput, setRawInput] = useState("");
+  const [locked, setLocked] = useState(false);
+  const [lockedText, setLockedText] = useState("");
   const intervalOptions = [30, 60, 120, 180, 240, 300] as const;
   const lineOptions = [1, 3, 5, 7, 10, 12, 15] as const;
   const [intervalSec, setIntervalSec] =
@@ -70,18 +72,20 @@ export default function Distributor() {
     return () => clearInterval(t);
   }, [job?.id]);
 
+  const distributorText = useMemo(() => (locked ? lockedText : dedupText), [locked, lockedText, dedupText]);
+
   const start = async () => {
     setError(null);
     try {
       const targetIds = Object.keys(selected).filter((k) => selected[k]);
       const res = await DistributorApi.createJob({
-        text: dedupText,
+        text: distributorText,
         intervalSec,
         linesPerTick,
         targetIds,
       });
       setJob(res.job);
-      setRawInput("");
+      if (!locked) setRawInput("");
     } catch (e: any) {
       setError(e.message || "Failed to start job");
     }
@@ -124,7 +128,7 @@ export default function Distributor() {
   }, [rawInput]);
 
   const queueRows = useMemo(() => {
-    if (!job && (!historyJobs || historyJobs.length === 0)) return [] as {
+    if (!job && (!historyJobs || historyJobs.length === 0) && !distributorText.trim()) return [] as {
       index: number;
       line: string;
       userId: string;
@@ -167,6 +171,22 @@ export default function Distributor() {
       }
     }
 
+    // If no running job, preview current Distributor text mapping (pending)
+    if (!job && distributorText.trim()) {
+      const previewLines = distributorText.replace(/\r\n/g, "\n").split("\n");
+      const targetsArray = Object.keys(selected).filter((k) => selected[k]);
+      const L = linesPerTick;
+      const round = (targetsArray.length || 1) * L;
+      for (let i = 0; i < previewLines.length; i++) {
+        const inRound = i % round;
+        const targetIdx = Math.floor(inRound / L);
+        const userId = (targetsArray[targetIdx] || targetsArray[0]) as string | undefined;
+        const m = userId ? memberById[userId] : undefined;
+        const userLabel = userId ? (m ? `${m.name} (${m.email})` : userId) : "—";
+        rows.push({ index: i + 1, line: previewLines[i], userId: userId || "", userLabel, status: "pending" });
+      }
+    }
+
     // Append previous jobs' queues
     const excludeId = job?.id;
     for (const hj of historyJobs) {
@@ -187,7 +207,7 @@ export default function Distributor() {
         r.index.toString() === q ||
         r.status.toLowerCase().includes(q),
     );
-  }, [job, memberById, search, historyJobs]);
+  }, [job, memberById, search, historyJobs, distributorText, linesPerTick, selected]);
 
   return (
     <div className="space-y-6">
@@ -209,8 +229,34 @@ export default function Distributor() {
               placeholder={"Paste or type lines here for de-duplication"}
             />
           </div>
-          <div className="text-sm text-white/70">
-            Kept lines: {dedupText ? dedupText.split("\n").length : 0}
+          <div className="flex items-center justify-between text-sm text-white/70">
+            <span>Kept lines: {dedupText ? dedupText.split("\n").length : 0}</span>
+            <div className="flex items-center gap-2">
+              {!locked ? (
+                <Button
+                  variant="secondary"
+                  type="button"
+                  onClick={() => {
+                    setLocked(true);
+                    setLockedText(dedupText);
+                  }}
+                >
+                  Add to Distributor
+                </Button>
+              ) : (
+                <Button
+                  variant="secondary"
+                  type="button"
+                  onClick={() => {
+                    setLocked(false);
+                    setLockedText("");
+                  }}
+                >
+                  Unlock
+                </Button>
+              )}
+              {locked && <span className="text-green-300">Saved</span>}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -238,7 +284,7 @@ export default function Distributor() {
               Text (each line will be sent separately)
             </Label>
             <Textarea
-              value={dedupText}
+              value={distributorText}
               readOnly
               rows={10}
               className="bg-white/10 text-white border-white/20"
@@ -302,7 +348,7 @@ export default function Distributor() {
           <Button
             type="button"
             onClick={start}
-            disabled={!dedupText.trim() || !Object.values(selected).some(Boolean)}
+            disabled={!distributorText.trim() || !Object.values(selected).some(Boolean)}
           >
             Start
           </Button>
@@ -327,10 +373,7 @@ export default function Distributor() {
           </div>
         </CardHeader>
         <CardContent>
-          {!job ? (
-            <p className="text-white/60">Start a distribution to see queue.</p>
-          ) : (
-            <div className="rounded-md border border-white/10 bg-white/5">
+          <div className="rounded-md border border-white/10 bg-white/5">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -371,7 +414,6 @@ export default function Distributor() {
                 </TableBody>
               </Table>
             </div>
-          )}
         </CardContent>
       </Card>
     </div>
