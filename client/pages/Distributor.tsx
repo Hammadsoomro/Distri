@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,6 +10,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { TeamApi, DistributorApi } from "@/lib/api";
 import type { PublicUser, Job } from "@shared/api";
 
@@ -24,28 +33,29 @@ export default function Distributor() {
     useState<(typeof lineOptions)[number]>(1);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [job, setJob] = useState<Job | null>(null);
-  const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
-  const load = async () => {
+  const loadMembers = async () => {
     const res = await TeamApi.list();
     setMembers(res.members);
   };
-  const loadJobs = async () => {
+  const loadRunningJob = async () => {
     const res = await DistributorApi.listJobs();
-    setJobs(res.jobs);
+    const running = res.jobs.find((j) => j.status === "running") || null;
+    setJob(running);
   };
 
   useEffect(() => {
-    load();
-    loadJobs();
+    loadMembers();
+    loadRunningJob();
   }, []);
+
   useEffect(() => {
     if (!job) return;
     const t = setInterval(async () => {
       const res = await DistributorApi.getJob(job.id);
       setJob(res.job);
-      loadJobs();
     }, 2000);
     return () => clearInterval(t);
   }, [job?.id]);
@@ -71,13 +81,56 @@ export default function Distributor() {
     await DistributorApi.cancelJob(id);
     const res = await DistributorApi.getJob(id);
     setJob(res.job);
-    await loadJobs();
   };
 
   const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
 
+  const memberById = useMemo(() => {
+    const map: Record<string, PublicUser> = {};
+    for (const m of members) map[m.id] = m;
+    return map;
+  }, [members]);
+
+  const queueRows = useMemo(() => {
+    if (!job) return [] as {
+      index: number;
+      line: string;
+      userId: string;
+      userLabel: string;
+      status: "sent" | "pending" | "failed";
+    }[];
+    const T = job.targets.length || 1;
+    const L = job.linesPerTick;
+    const round = T * L;
+    const rows: {
+      index: number;
+      line: string;
+      userId: string;
+      userLabel: string;
+      status: "sent" | "pending" | "failed";
+    }[] = [];
+    for (let i = 0; i < job.textLines.length; i++) {
+      const inRound = i % round;
+      const targetIdx = Math.floor(inRound / L);
+      const userId = job.targets[targetIdx] || job.targets[0];
+      const m = memberById[userId];
+      const userLabel = m ? `${m.name} (${m.email})` : userId;
+      const status = i < job.nextIndex ? "sent" : "pending";
+      rows.push({ index: i + 1, line: job.textLines[i], userId, userLabel, status });
+    }
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(
+      (r) =>
+        r.line.toLowerCase().includes(q) ||
+        r.userLabel.toLowerCase().includes(q) ||
+        r.index.toString() === q ||
+        r.status.toLowerCase().includes(q),
+    );
+  }, [job, memberById, search]);
+
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="space-y-6">
       <Card className="bg-white/5 border-white/10 text-white">
         <CardHeader>
           <CardTitle>Distributor</CardTitle>
@@ -86,119 +139,160 @@ export default function Distributor() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label className="text-white">
-              Text (each line will be sent separately)
-            </Label>
-            <Textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={10}
-              className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
-              placeholder={
-                "Write lines here...\nEach line will be sent as a separate message."
-              }
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-white mb-2 block">Timer (sec)</Label>
-              <div className="flex gap-2 flex-wrap">
-                {intervalOptions.map((s) => (
-                  <Button
-                    key={s}
-                    type="button"
-                    variant={intervalSec === s ? "default" : "secondary"}
-                    onClick={() => setIntervalSec(s as any)}
-                  >
-                    {s}
-                  </Button>
-                ))}
+          {!job || job.status !== "running" ? (
+            <>
+              <div>
+                <Label className="text-white">
+                  Text (each line will be sent separately)
+                </Label>
+                <Textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  rows={10}
+                  className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
+                  placeholder={
+                    "Write lines here...\nEach line will be sent as a separate message."
+                  }
+                />
               </div>
-            </div>
-            <div>
-              <Label className="text-white mb-2 block">Lines per send</Label>
-              <div className="flex gap-2 flex-wrap">
-                {lineOptions.map((s) => (
-                  <Button
-                    key={s}
-                    type="button"
-                    variant={linesPerTick === s ? "default" : "secondary"}
-                    onClick={() => setLinesPerTick(s as any)}
-                  >
-                    {s}
-                  </Button>
-                ))}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white mb-2 block">Timer (sec)</Label>
+                  <div className="flex gap-2 flex-wrap">
+                    {intervalOptions.map((s) => (
+                      <Button
+                        key={s}
+                        type="button"
+                        variant={intervalSec === s ? "default" : "secondary"}
+                        onClick={() => setIntervalSec(s as any)}
+                      >
+                        {s}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-white mb-2 block">Lines per send</Label>
+                  <div className="flex gap-2 flex-wrap">
+                    {lineOptions.map((s) => (
+                      <Button
+                        key={s}
+                        type="button"
+                        variant={linesPerTick === s ? "default" : "secondary"}
+                        onClick={() => setLinesPerTick(s as any)}
+                      >
+                        {s}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
               </div>
+              <div>
+                <Label className="text-white mb-2 block">Recipients (Team)</Label>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {members.map((m) => (
+                    <label
+                      key={m.id}
+                      className="flex items-center gap-2 p-2 rounded bg-white/5 border border-white/10"
+                    >
+                      <Checkbox
+                        checked={!!selected[m.id]}
+                        onCheckedChange={() => toggle(m.id)}
+                      />
+                      <span>
+                        {m.name} <span className="text-white/60">({m.email})</span>
+                      </span>
+                    </label>
+                  ))}
+                  {members.length === 0 && (
+                    <p className="text-white/60">Add team members first.</p>
+                  )}
+                </div>
+              </div>
+              {error && <p className="text-red-400 text-sm">{error}</p>}
+              <Button
+                type="button"
+                onClick={start}
+                disabled={!text.trim() || !Object.values(selected).some(Boolean)}
+              >
+                Start
+              </Button>
+            </>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Job started • {job.linesPerTick} lines • {job.intervalSec}s</p>
+                <p className="text-white/60 text-sm">Queue is shown below.</p>
+              </div>
+              <Button variant="destructive" onClick={() => cancel(job.id)}>Cancel</Button>
             </div>
-          </div>
-          <div>
-            <Label className="text-white mb-2 block">Recipients (Team)</Label>
-            <div className="grid sm:grid-cols-2 gap-2">
-              {members.map((m) => (
-                <label
-                  key={m.id}
-                  className="flex items-center gap-2 p-2 rounded bg-white/5 border border-white/10"
-                >
-                  <Checkbox
-                    checked={!!selected[m.id]}
-                    onCheckedChange={() => toggle(m.id)}
-                  />
-                  <span>
-                    {m.name} <span className="text-white/60">({m.email})</span>
-                  </span>
-                </label>
-              ))}
-              {members.length === 0 && (
-                <p className="text-white/60">Add team members first.</p>
-              )}
-            </div>
-          </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          <Button
-            type="button"
-            onClick={start}
-            disabled={!text.trim() || !Object.values(selected).some(Boolean)}
-          >
-            Start
-          </Button>
+          )}
         </CardContent>
       </Card>
 
       <Card className="bg-white/5 border-white/10 text-white">
-        <CardHeader>
-          <CardTitle>Jobs</CardTitle>
-          <CardDescription className="text-white/70">
-            Running and completed jobs
-          </CardDescription>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <CardTitle>Queue</CardTitle>
+            <CardDescription className="text-white/70">
+              Line-wise progress with recipient and status
+            </CardDescription>
+          </div>
+          <div className="w-full sm:w-64">
+            <Input
+              placeholder="Search line, user, status..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
+            />
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {jobs.map((j) => (
-              <div
-                key={j.id}
-                className="p-3 rounded bg-white/5 border border-white/10 flex items-center justify-between"
-              >
-                <div>
-                  <p className="font-medium">
-                    {j.status.toUpperCase()} • {j.linesPerTick} lines •{" "}
-                    {j.intervalSec}s
-                  </p>
-                  <p className="text-white/60 text-sm">
-                    Sent {j.nextIndex}/{j.textLines.length} lines
-                  </p>
-                </div>
-                {j.status === "running" ? (
-                  <Button variant="destructive" onClick={() => cancel(j.id)}>
-                    Cancel
-                  </Button>
-                ) : (
-                  <span className="text-white/60 text-sm">Done</span>
-                )}
-              </div>
-            ))}
-            {jobs.length === 0 && <p className="text-white/60">No jobs yet.</p>}
-          </div>
+          {!job ? (
+            <p className="text-white/60">Start a distribution to see queue.</p>
+          ) : (
+            <div className="rounded-md border border-white/10 bg-white/5">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[90px]">Line #</TableHead>
+                    <TableHead>Line</TableHead>
+                    <TableHead className="w-[280px]">User</TableHead>
+                    <TableHead className="w-[120px]">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {queueRows.map((r) => (
+                    <TableRow key={`${r.index}-${r.userId}`}>
+                      <TableCell>#{r.index}</TableCell>
+                      <TableCell className="text-white/90 whitespace-pre-wrap">{r.line}</TableCell>
+                      <TableCell className="text-white/80">{r.userLabel}</TableCell>
+                      <TableCell>
+                        <span
+                          className={
+                            r.status === "sent"
+                              ? "text-green-400"
+                              : r.status === "failed"
+                                ? "text-red-400"
+                                : "text-yellow-300"
+                          }
+                        >
+                          {r.status}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {queueRows.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-white/60">
+                        No matching rows
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
