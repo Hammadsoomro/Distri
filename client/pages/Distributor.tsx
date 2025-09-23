@@ -94,7 +94,6 @@ export default function Distributor() {
     return kept.join("\n");
   }, [rawInput]);
 
-  const distributorText = useMemo(() => (locked ? lockedText : dedupText), [locked, lockedText, dedupText]);
 
   const start = async () => {
     setError(null);
