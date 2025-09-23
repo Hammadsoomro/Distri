@@ -31,7 +31,19 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   };
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(path, { ...init, headers });
+  const url = path.startsWith("http")
+    ? path
+    : new URL(path, window.location.origin).toString();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  let res: Response;
+  try {
+    res = await fetch(url, { ...init, headers, signal: controller.signal });
+  } catch (e: any) {
+    clearTimeout(timeout);
+    throw new Error("Network error. Please check your connection and try again.");
+  }
+  clearTimeout(timeout);
   if (!res.ok) {
     let message = `${res.status}`;
     try {
