@@ -186,17 +186,6 @@ export default function Distributor() {
       }
     }
 
-    // Append previous jobs' queues
-    const excludeId = job?.id;
-    for (const hj of historyJobs) {
-      if (excludeId && hj.id === excludeId) continue;
-      for (const q of hj.queue || []) {
-        const m = memberById[q.userId];
-        const userLabel = m ? `${m.name} (${m.email})` : q.userId;
-        rows.push({ index: q.lineNumber, line: q.line, userId: q.userId, userLabel, status: q.status });
-      }
-    }
-
     // Only show pending in queue
     rows = rows.filter((r) => r.status === "pending");
 
