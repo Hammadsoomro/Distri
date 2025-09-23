@@ -275,7 +275,25 @@ export default function Distributor() {
                     setDistAccum((prev) => {
                       const add = dedupText.trim();
                       if (!add) return prev;
-                      return prev ? `${prev}\n${add}` : add;
+                      const prevLines = prev ? prev.replace(/\r\n/g, "\n").split("\n") : [];
+                      const addLines = add.replace(/\r\n/g, "\n").split("\n");
+                      const key = (s: string) => s
+                        .trim()
+                        .replace(/[\t]+/g, " ")
+                        .split(/\s+/)
+                        .slice(0, 15)
+                        .map((w) => w.replace(/^[^\w]+|[^\w]+$/g, "").toLowerCase())
+                        .filter(Boolean)
+                        .join(" ");
+                      const seen = new Set(prevLines.map(key).filter(Boolean));
+                      const uniques = addLines.filter((l) => {
+                        const k = key(l);
+                        if (!k || seen.has(k)) return false;
+                        seen.add(k);
+                        return true;
+                      });
+                      if (uniques.length === 0) return prev;
+                      return prevLines.length ? `${prev}\n${uniques.join("\n")}` : uniques.join("\n");
                     })
                   }
                 >
