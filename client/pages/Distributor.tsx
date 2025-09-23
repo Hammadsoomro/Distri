@@ -105,28 +105,6 @@ export default function Distributor() {
     return map;
   }, [members]);
 
-  const dedupText = useMemo(() => {
-    const lines = rawInput.replace(/\r\n/g, "\n").split("\n");
-    const seen = new Set<string>();
-    const kept: string[] = [];
-    for (const raw of lines) {
-      const trimmed = raw.trim();
-      if (!trimmed) continue;
-      const words = trimmed
-        .replace(/[\t]+/g, " ")
-        .split(/\s+/)
-        .slice(0, 15)
-        .map((w) => w.replace(/^[^\w]+|[^\w]+$/g, "").toLowerCase())
-        .filter(Boolean);
-      const key = words.join(" ");
-      if (key && !seen.has(key)) {
-        seen.add(key);
-        kept.push(trimmed);
-      }
-    }
-    return kept.join("\n");
-  }, [rawInput]);
-
   const queueRows = useMemo(() => {
     if (!job && (!historyJobs || historyJobs.length === 0) && !distributorText.trim()) return [] as {
       index: number;
