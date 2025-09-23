@@ -170,8 +170,8 @@ export default function Distributor() {
     }
 
     // If no running job, preview current Distributor text mapping (pending)
-    if (!job && distributorText.trim()) {
-      const previewLines = distributorText.replace(/\r\n/g, "\n").split("\n");
+    if (!job && distAccum.trim()) {
+      const previewLines = distAccum.replace(/\r\n/g, "\n").split("\n");
       const targetsArray = Object.keys(selected).filter((k) => selected[k]);
       const L = linesPerTick;
       const round = (targetsArray.length || 1) * L;
