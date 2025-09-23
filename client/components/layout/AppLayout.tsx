@@ -53,11 +53,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {user?.role === "admin" && (
               <>
                 <NavLink
-                  to="/team"
-                  label="Team"
-                  current={loc.pathname.startsWith("/team")}
-                />
-                <NavLink
                   to="/distributor"
                   label="Distributor"
                   current={loc.pathname.startsWith("/distributor")}
@@ -81,6 +76,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 to="/inbox"
                 label={`Inbox${unread ? ` (${unread})` : ""}`}
                 current={loc.pathname.startsWith("/inbox")}
+              />
+            )}
+            {user && (
+              <NavLink
+                to="/members"
+                label="Team members"
+                current={loc.pathname.startsWith("/members")}
               />
             )}
           </nav>
