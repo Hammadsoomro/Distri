@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -101,10 +102,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   {user.name} ({user.role})
                 </span>
                 <Button
-                  variant="secondary"
-                  onClick={() => navigate("/dashboard")}
+                  variant="ghost"
+                  size="icon"
+                  className="text-white/80"
+                  onClick={() => navigate("/settings")}
                 >
-                  Dashboard
+                  <Settings />
                 </Button>
                 <Button
                   variant="ghost"
