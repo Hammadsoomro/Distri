@@ -38,7 +38,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <Link to="/" className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-primary shadow-lg shadow-primary/30" />
             <span className="font-extrabold tracking-tight text-lg">
-              Line Distributor
+              Team-Work
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
@@ -119,7 +119,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
       <main className="container mx-auto px-4 py-8">{children}</main>
       <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">
-        © {new Date().getFullYear()} Line Distributor • Built for teams
+        © {new Date().getFullYear()} Team-Work • Built for teams
       </footer>
     </div>
   );
