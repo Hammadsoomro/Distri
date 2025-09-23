@@ -101,7 +101,7 @@ export default function Distributor() {
     try {
       const targetIds = Object.keys(selected).filter((k) => selected[k]);
       const res = await DistributorApi.createJob({
-        text: distributorText,
+        text: distAccum,
         intervalSec,
         linesPerTick,
         targetIds,
