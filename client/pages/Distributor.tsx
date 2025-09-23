@@ -25,8 +25,7 @@ import type { PublicUser, Job } from "@shared/api";
 export default function Distributor() {
   const [members, setMembers] = useState<PublicUser[]>([]);
   const [rawInput, setRawInput] = useState("");
-  const [locked, setLocked] = useState(false);
-  const [lockedText, setLockedText] = useState("");
+  const [distAccum, setDistAccum] = useState("");
   const intervalOptions = [30, 60, 120, 180, 240, 300] as const;
   const lineOptions = [1, 3, 5, 7, 10, 12, 15] as const;
   const [intervalSec, setIntervalSec] =
