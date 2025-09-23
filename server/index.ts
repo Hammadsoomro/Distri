@@ -6,7 +6,13 @@ import { handleDemo } from "./routes/demo";
 import { authMiddleware } from "./auth";
 import { adminSetup, login, me, updateProfile } from "./routes/auth";
 import { listTeam, createMember, deleteMember } from "./routes/team";
-import { createJob, listJobs, getJob, cancelJob, listQueues } from "./routes/distributor";
+import {
+  createJob,
+  listJobs,
+  getJob,
+  cancelJob,
+  listQueues,
+} from "./routes/distributor";
 import { getInbox, clearInbox } from "./routes/inbox";
 import {
   listConversations,

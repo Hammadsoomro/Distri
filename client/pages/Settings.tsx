@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -72,23 +78,45 @@ export default function Settings() {
         <Card className="bg-white/5 border-white/10 text-white">
           <CardHeader>
             <CardTitle>Settings</CardTitle>
-            <CardDescription className="text-white/70">Manage your account settings</CardDescription>
+            <CardDescription className="text-white/70">
+              Manage your account settings
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={onSave} className="space-y-4">
               <div>
-                <Label htmlFor="name" className="text-white">Name</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="bg-white/10 text-white border-white/20" required />
+                <Label htmlFor="name" className="text-white">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-white/10 text-white border-white/20"
+                  required
+                />
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-white">New password</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white/10 text-white border-white/20" />
-                <p className="text-white/60 text-sm mt-1">Leave blank to keep existing password.</p>
+                <Label htmlFor="password" className="text-white">
+                  New password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-white/10 text-white border-white/20"
+                />
+                <p className="text-white/60 text-sm mt-1">
+                  Leave blank to keep existing password.
+                </p>
               </div>
 
               <div>
-                <Label htmlFor="avatar" className="text-white">Avatar</Label>
+                <Label htmlFor="avatar" className="text-white">
+                  Avatar
+                </Label>
                 <input
                   id="avatar"
                   type="file"
@@ -123,23 +151,41 @@ export default function Settings() {
                 <div className="grid grid-cols-1 gap-2 mt-2">
                   <div className="p-3 rounded bg-white/5 border border-white/10">
                     <div className="font-medium">Notifications</div>
-                    <div className="text-white/70 text-sm">Enable desktop notifications for new messages</div>
+                    <div className="text-white/70 text-sm">
+                      Enable desktop notifications for new messages
+                    </div>
                   </div>
                   <div className="p-3 rounded bg-white/5 border border-white/10">
                     <div className="font-medium">Theme</div>
-                    <div className="text-white/70 text-sm">Use system theme or toggle dark mode from the header</div>
+                    <div className="text-white/70 text-sm">
+                      Use system theme or toggle dark mode from the header
+                    </div>
                   </div>
                   <div className="p-3 rounded bg-white/5 border border-white/10">
                     <div className="font-medium">Advanced</div>
-                    <div className="text-white/70 text-sm">Manage API access and integrations</div>
+                    <div className="text-white/70 text-sm">
+                      Manage API access and integrations
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {message && <div className="text-sm text-white/80">{message}</div>}
+              {message && (
+                <div className="text-sm text-white/80">{message}</div>
+              )}
               <div className="flex gap-2">
-                <Button type="submit" disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
-                <Button variant="ghost" onClick={() => { setName(user?.name || ""); setPassword(""); }}>Reset</Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? "Saving..." : "Save"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setName(user?.name || "");
+                    setPassword("");
+                  }}
+                >
+                  Reset
+                </Button>
               </div>
             </form>
           </CardContent>
@@ -150,42 +196,89 @@ export default function Settings() {
         <Card className="bg-white/5 border-white/10 text-white">
           <CardHeader>
             <CardTitle>Team Management</CardTitle>
-            <CardDescription className="text-white/70">Add or remove team members</CardDescription>
+            <CardDescription className="text-white/70">
+              Add or remove team members
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={addMember} className="space-y-3 mb-4">
               <div>
                 <Label className="text-white">Name</Label>
-                <Input value={mName} onChange={(e) => setMName(e.target.value)} className="bg-white/10 text-white border-white/20" required />
+                <Input
+                  value={mName}
+                  onChange={(e) => setMName(e.target.value)}
+                  className="bg-white/10 text-white border-white/20"
+                  required
+                />
               </div>
               <div>
                 <Label className="text-white">Email</Label>
-                <Input type="email" value={mEmail} onChange={(e) => setMEmail(e.target.value)} className="bg-white/10 text-white border-white/20" required />
+                <Input
+                  type="email"
+                  value={mEmail}
+                  onChange={(e) => setMEmail(e.target.value)}
+                  className="bg-white/10 text-white border-white/20"
+                  required
+                />
               </div>
               <div>
                 <Label className="text-white">Password</Label>
-                <Input type="password" value={mPassword} onChange={(e) => setMPassword(e.target.value)} className="bg-white/10 text-white border-white/20" required />
+                <Input
+                  type="password"
+                  value={mPassword}
+                  onChange={(e) => setMPassword(e.target.value)}
+                  className="bg-white/10 text-white border-white/20"
+                  required
+                />
               </div>
               <div className="flex gap-2">
                 <Button type="submit">Add Member</Button>
-                <Button variant="ghost" onClick={() => { setMName(""); setMEmail(""); setMPassword(""); }}>Reset</Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setMName("");
+                    setMEmail("");
+                    setMPassword("");
+                  }}
+                >
+                  Reset
+                </Button>
               </div>
             </form>
 
             <ul className="divide-y divide-white/10">
               {members.map((m) => (
-                <li key={m.id} className="py-3 flex items-center justify-between">
+                <li
+                  key={m.id}
+                  className="py-3 flex items-center justify-between"
+                >
                   <div>
                     <p className="font-medium">{m.name}</p>
                     <p className="text-white/60 text-sm">{m.email}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button onClick={() => ChatApi.createConversation([m.id]).then((r) => window.location.pathname = `/chat/${r.conversation.id}`)}>Chat</Button>
-                    <Button variant="destructive" onClick={() => removeMember(m.id)}>Delete</Button>
+                    <Button
+                      onClick={() =>
+                        ChatApi.createConversation([m.id]).then(
+                          (r) =>
+                            (window.location.pathname = `/chat/${r.conversation.id}`),
+                        )
+                      }
+                    >
+                      Chat
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => removeMember(m.id)}
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </li>
               ))}
-              {members.length === 0 && <p className="text-white/60">No members yet.</p>}
+              {members.length === 0 && (
+                <p className="text-white/60">No members yet.</p>
+              )}
             </ul>
           </CardContent>
         </Card>

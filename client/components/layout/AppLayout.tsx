@@ -101,7 +101,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             ) : (
               <>
                 {user.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="h-8 w-8 rounded-full mr-3 object-cover hidden sm:inline-block" />
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="h-8 w-8 rounded-full mr-3 object-cover hidden sm:inline-block"
+                  />
                 ) : (
                   <span className="hidden sm:block text-white/70 text-sm mr-2">
                     {user.name} ({user.role})

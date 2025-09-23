@@ -57,8 +57,10 @@ export const updateProfile: RequestHandler = (req, res) => {
   const { name, password, avatarBase64 } = req.body || {};
   const user = areq.user as any;
   if (typeof name === "string" && name.trim()) user.name = name.trim();
-  if (typeof password === "string" && password.trim()) user.passwordHash = hashPassword(password);
-  if (typeof avatarBase64 === "string" && avatarBase64.trim()) user.avatar = avatarBase64;
+  if (typeof password === "string" && password.trim())
+    user.passwordHash = hashPassword(password);
+  if (typeof avatarBase64 === "string" && avatarBase64.trim())
+    user.avatar = avatarBase64;
   // persist into in-memory DB
   const stored = db.users.get(user.id);
   if (stored) {

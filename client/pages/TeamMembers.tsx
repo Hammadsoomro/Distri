@@ -15,7 +15,9 @@ export default function TeamMembers() {
   const [members, setMembers] = useState<PublicUser[]>([]);
 
   useEffect(() => {
-    TeamApi.list().then((r) => setMembers(r.members)).catch(() => setMembers([]));
+    TeamApi.list()
+      .then((r) => setMembers(r.members))
+      .catch(() => setMembers([]));
   }, []);
 
   return (
@@ -24,15 +26,26 @@ export default function TeamMembers() {
       <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {members.map((m) => {
           const sales = randomStat(m.id + "s", 8000, 35000);
-          const target = Math.round(sales * (0.8 + (randomStat(m.id + "t", 0, 40) / 100)));
+          const target = Math.round(
+            sales * (0.8 + randomStat(m.id + "t", 0, 40) / 100),
+          );
           const percent = Math.round((sales / target) * 100);
           const calls = randomStat(m.id + "c", 10, 80);
           const demos = randomStat(m.id + "d", 1, 30);
 
           return (
-            <Card key={m.id} className="bg-white/5 border-white/10 text-white p-0 overflow-hidden">
+            <Card
+              key={m.id}
+              className="bg-white/5 border-white/10 text-white p-0 overflow-hidden"
+            >
               <CardHeader className="p-4 text-center">
-                <div className="mx-auto h-20 w-20 rounded-full bg-gradient-to-tr from-primary to-accent grid place-items-center text-2xl font-bold text-white">{(m.name || "?").split(" ").map(s=>s[0]).slice(0,2).join("")}</div>
+                <div className="mx-auto h-20 w-20 rounded-full bg-gradient-to-tr from-primary to-accent grid place-items-center text-2xl font-bold text-white">
+                  {(m.name || "?")
+                    .split(" ")
+                    .map((s) => s[0])
+                    .slice(0, 2)
+                    .join("")}
+                </div>
                 <CardTitle className="mt-3 text-lg">{m.name}</CardTitle>
                 <div className="text-white/60 text-sm">{m.email}</div>
               </CardHeader>
@@ -41,11 +54,15 @@ export default function TeamMembers() {
                 <div className="flex items-end justify-between gap-4">
                   <div>
                     <div className="text-sm text-white/70">Sales</div>
-                    <div className="text-xl font-extrabold">{sales.toLocaleString()}</div>
+                    <div className="text-xl font-extrabold">
+                      {sales.toLocaleString()}
+                    </div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-white/70">Target</div>
-                    <div className="text-lg font-semibold">{target.toLocaleString()}</div>
+                    <div className="text-lg font-semibold">
+                      {target.toLocaleString()}
+                    </div>
                   </div>
                 </div>
 
@@ -70,20 +87,29 @@ export default function TeamMembers() {
                   </div>
                   <div className="p-2 rounded bg-white/3">
                     <div className="font-medium">Open Leads</div>
-                    <div className="text-white/80">{Math.max(0, Math.floor((target - sales) / 100))}</div>
+                    <div className="text-white/80">
+                      {Math.max(0, Math.floor((target - sales) / 100))}
+                    </div>
                   </div>
                   <div className="p-2 rounded bg-white/3">
                     <div className="font-medium">Conversion</div>
-                    <div className="text-white/80">{Math.max(10, Math.round((demos / Math.max(1, calls)) * 100))}%</div>
+                    <div className="text-white/80">
+                      {Math.max(
+                        10,
+                        Math.round((demos / Math.max(1, calls)) * 100),
+                      )}
+                      %
+                    </div>
                   </div>
                 </div>
-
               </CardContent>
             </Card>
           );
         })}
 
-        {members.length === 0 && <p className="text-white/60">No members yet.</p>}
+        {members.length === 0 && (
+          <p className="text-white/60">No members yet.</p>
+        )}
       </div>
     </div>
   );

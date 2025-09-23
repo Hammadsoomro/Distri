@@ -58,22 +58,25 @@ export default function Jobs() {
               .join(", ");
             return (
               <Link key={j.id} to={`/jobs/${j.id}`} className="block">
-                <div
-                  className="p-3 rounded bg-white/5 border border-white/10 flex items-center justify-between"
-                >
+                <div className="p-3 rounded bg-white/5 border border-white/10 flex items-center justify-between">
                   <div>
                     <p className="font-medium">
-                      {j.status.toUpperCase()} • {j.linesPerTick} lines • {j.intervalSec}s
+                      {j.status.toUpperCase()} • {j.linesPerTick} lines •{" "}
+                      {j.intervalSec}s
                     </p>
-                    <p className="text-white/60 text-sm">
-                      To: {names || "—"}
-                    </p>
+                    <p className="text-white/60 text-sm">To: {names || "—"}</p>
                     <p className="text-white/60 text-sm">
                       Sent {j.nextIndex}/{j.textLines.length} lines
                     </p>
                   </div>
                   {j.status === "running" ? (
-                    <Button variant="destructive" onClick={(e) => { e.preventDefault(); cancel(j.id); }}>
+                    <Button
+                      variant="destructive"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        cancel(j.id);
+                      }}
+                    >
                       Cancel
                     </Button>
                   ) : (

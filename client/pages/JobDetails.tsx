@@ -45,22 +45,39 @@ export default function JobDetails() {
         <CardContent>
           <div className="mb-4">
             <div className="text-white/70">Status: {job.status}</div>
-            <div className="text-white/70">Lines per tick: {job.linesPerTick}</div>
+            <div className="text-white/70">
+              Lines per tick: {job.linesPerTick}
+            </div>
             <div className="text-white/70">Interval: {job.intervalSec}s</div>
-            <div className="text-white/70">Sent: {job.nextIndex}/{job.textLines.length}</div>
+            <div className="text-white/70">
+              Sent: {job.nextIndex}/{job.textLines.length}
+            </div>
           </div>
 
           <div className="space-y-4">
             {Object.keys(grouped).map((uid) => (
-              <div key={uid} className="p-3 rounded bg-white/5 border border-white/10">
+              <div
+                key={uid}
+                className="p-3 rounded bg-white/5 border border-white/10"
+              >
                 <div className="font-semibold">To: {uid}</div>
                 <div className="text-white/70 text-sm">Lines:</div>
                 <ol className="mt-2 list-decimal ml-5 space-y-1 text-white/80">
                   {grouped[uid].map((q) => (
-                    <li key={q.lineNumber} className={q.status === 'sent' ? 'line-through text-white/50' : ''}>
+                    <li
+                      key={q.lineNumber}
+                      className={
+                        q.status === "sent" ? "line-through text-white/50" : ""
+                      }
+                    >
                       <div className="flex justify-between">
                         <span>{q.line}</span>
-                        <span className="text-white/60 text-xs">#{q.lineNumber} {q.status === 'sent' && q.sentAt ? `• ${new Date(q.sentAt).toLocaleString()}` : ''}</span>
+                        <span className="text-white/60 text-xs">
+                          #{q.lineNumber}{" "}
+                          {q.status === "sent" && q.sentAt
+                            ? `• ${new Date(q.sentAt).toLocaleString()}`
+                            : ""}
+                        </span>
                       </div>
                     </li>
                   ))}
