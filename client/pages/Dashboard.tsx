@@ -86,6 +86,20 @@ export default function Dashboard() {
         </div>
 
         <div className="lg:col-span-2 space-y-4">
+          <div className="rounded bg-white/5 p-4 border border-white/10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-semibold">Sales graph</div>
+              <div className="flex gap-2">
+                <button className={range==="day"?"px-2 py-1 rounded bg-primary text-primary-foreground":"px-2 py-1 rounded bg-background text-white/80"} onClick={()=>setRange("day")}>Day</button>
+                <button className={range==="week"?"px-2 py-1 rounded bg-primary text-primary-foreground":"px-2 py-1 rounded bg-background text-white/80"} onClick={()=>setRange("week")}>Week</button>
+                <button className={range==="month"?"px-2 py-1 rounded bg-primary text-primary-foreground":"px-2 py-1 rounded bg-background text-white/80"} onClick={()=>setRange("month")}>Month</button>
+              </div>
+            </div>
+            <div className="h-48">
+              <SVGChart range={range} leaders={leaders} />
+            </div>
+          </div>
+
           {leaders.map((p, i) => {
             const percent = Math.round((p.sales / p.target) * 100);
             return (
