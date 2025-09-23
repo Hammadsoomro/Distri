@@ -42,7 +42,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
-            <NavLink to="/" label="Home" current={loc.pathname === "/"} />
+            {user && (
+              <NavLink
+                to="/dashboard"
+                label="Dashboard"
+                current={loc.pathname.startsWith("/dashboard")}
+              />
+            )}
             {user?.role === "admin" && (
               <>
                 <NavLink
@@ -96,9 +102,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </span>
                 <Button
                   variant="secondary"
-                  onClick={() =>
-                    navigate(user.role === "admin" ? "/distributor" : "/inbox")
-                  }
+                  onClick={() => navigate("/dashboard")}
                 >
                   Dashboard
                 </Button>
