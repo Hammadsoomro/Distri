@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { TeamApi } from "@/lib/api";
 
 function Ring({ value }: { value: number }) {
   const pct = Math.max(0, Math.min(100, value));
@@ -19,15 +21,28 @@ function Ring({ value }: { value: number }) {
   );
 }
 
-const leaders = [
-  { id: 1, name: "Leader 1", sales: 24569, target: 15700, img: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?q=80&w=256&auto=format&fit=crop" },
-  { id: 2, name: "Leader 2", sales: 24569, target: 15700, img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256&auto=format&fit=crop" },
-  { id: 3, name: "Leader 3", sales: 23000, target: 15500, img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=256&auto=format&fit=crop" },
-  { id: 4, name: "Leader 4", sales: 18750, target: 15700, img: "https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=256&auto=format&fit=crop" },
-  { id: 5, name: "Leader 5", sales: 14040, target: 13500, img: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=256&auto=format&fit=crop" }
-];
-
 export default function Dashboard() {
+  const [leaders, setLeaders] = useState<any[]>([]);
+
+  useEffect(() => {
+    TeamApi.list()
+      .then((res) => {
+        const members = res.members.slice(0, 5).map((m) => ({ id: m.id, name: m.name, sales: 20000 + Math.floor(Math.random() * 10000), target: 15000 + Math.floor(Math.random() * 2000), img: undefined }));
+        setLeaders(members);
+      })
+      .catch(() => {
+        // fallback static
+        setLeaders([
+          { id: 1, name: "Leader 1", sales: 24569, target: 15700, img: undefined },
+          { id: 2, name: "Leader 2", sales: 24569, target: 15700, img: undefined },
+          { id: 3, name: "Leader 3", sales: 23000, target: 15500, img: undefined },
+          { id: 4, name: "Leader 4", sales: 18750, target: 15700, img: undefined },
+          { id: 5, name: "Leader 5", sales: 14040, target: 13500, img: undefined },
+        ]);
+      });
+
+  }, []);
+
   const salesThisWeek = 155241;
   const target = 155200;
   const pct = Math.round((salesThisWeek / target) * 100);
