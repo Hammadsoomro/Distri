@@ -66,8 +66,10 @@ export default function Distributor() {
   useEffect(() => {
     if (!job) return;
     const t = setInterval(async () => {
-      const res = await DistributorApi.getJob(job.id);
-      setJob(res.job);
+      try {
+        const res = await DistributorApi.getJob(job.id);
+        setJob(res.job);
+      } catch {}
     }, 2000);
     return () => clearInterval(t);
   }, [job?.id]);
@@ -112,9 +114,11 @@ export default function Distributor() {
   };
 
   const cancel = async (id: string) => {
-    await DistributorApi.cancelJob(id);
-    const res = await DistributorApi.getJob(id);
-    setJob(res.job);
+    try {
+      await DistributorApi.cancelJob(id);
+      const res = await DistributorApi.getJob(id);
+      setJob(res.job);
+    } catch {}
   };
 
   const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
