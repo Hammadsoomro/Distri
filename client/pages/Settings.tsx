@@ -88,6 +88,37 @@ export default function Settings() {
               </div>
 
               <div>
+                <Label htmlFor="avatar" className="text-white">Avatar</Label>
+                <input
+                  id="avatar"
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    const data = await new Promise<string>((res, rej) => {
+                      const r = new FileReader();
+                      r.onload = () => res(String(r.result));
+                      r.onerror = rej;
+                      r.readAsDataURL(f);
+                    });
+                    setSaving(true);
+                    setMessage(null);
+                    try {
+                      await AuthApi.updateProfile({ avatarBase64: data });
+                      await refresh();
+                      setMessage("Avatar uploaded");
+                    } catch (err: any) {
+                      setMessage(err?.message || "Upload failed");
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  className="block text-sm text-white/70 mt-2"
+                />
+              </div>
+
+              <div>
                 <Label className="text-white">Preferences</Label>
                 <div className="grid grid-cols-1 gap-2 mt-2">
                   <div className="p-3 rounded bg-white/5 border border-white/10">
