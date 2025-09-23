@@ -72,6 +72,28 @@ export default function Distributor() {
     return () => clearInterval(t);
   }, [job?.id]);
 
+  const dedupText = useMemo(() => {
+    const lines = rawInput.replace(/\r\n/g, "\n").split("\n");
+    const seen = new Set<string>();
+    const kept: string[] = [];
+    for (const raw of lines) {
+      const trimmed = raw.trim();
+      if (!trimmed) continue;
+      const words = trimmed
+        .replace(/[\t]+/g, " ")
+        .split(/\s+/)
+        .slice(0, 15)
+        .map((w) => w.replace(/^[^\w]+|[^\w]+$/g, "").toLowerCase())
+        .filter(Boolean);
+      const key = words.join(" ");
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        kept.push(trimmed);
+      }
+    }
+    return kept.join("\n");
+  }, [rawInput]);
+
   const distributorText = useMemo(() => (locked ? lockedText : dedupText), [locked, lockedText, dedupText]);
 
   const start = async () => {
