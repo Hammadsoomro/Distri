@@ -254,7 +254,7 @@ export default function Distributor() {
             Paste lines here. If first 15 words match, duplicates are removed live.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-h-[60vh] overflow-y-auto pr-2">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-white">Input</Label>
@@ -321,7 +321,7 @@ export default function Distributor() {
             Set timer and lines-per-send
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
           {job && job.status === "running" && (
             <div className="flex items-center justify-between rounded border border-white/10 bg-white/5 p-3">
               <div>
@@ -398,13 +398,23 @@ export default function Distributor() {
             </div>
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
-          <Button
-            type="button"
-            onClick={start}
-            disabled={!distAccum.trim() || !Object.values(selected).some(Boolean)}
-          >
-            Start
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              onClick={start}
+              disabled={!distAccum.trim() || !Object.values(selected).some(Boolean)}
+            >
+              Start
+            </Button>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => setDistAccum("")}
+              disabled={!distAccum.trim()}
+            >
+              Clear
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -425,7 +435,7 @@ export default function Distributor() {
             />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-h-[60vh] overflow-y-auto pr-2">
           <div className="rounded-md border border-white/10 bg-white/5">
               <Table>
                 <TableHeader>
@@ -485,7 +495,7 @@ export default function Distributor() {
             />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-h-[60vh] overflow-y-auto pr-2">
           <div className="rounded-md border border-white/10 bg-white/5">
             <Table>
               <TableHeader>
