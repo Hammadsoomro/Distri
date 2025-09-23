@@ -282,7 +282,7 @@ export default function Distributor() {
               Text (each line will be sent separately)
             </Label>
             <Textarea
-              value={distributorText}
+              value={distAccum}
               readOnly
               rows={10}
               className="bg-white/10 text-white border-white/20"
