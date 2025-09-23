@@ -17,7 +17,6 @@ import Jobs from "./pages/Jobs";
 import JobDetails from "./pages/JobDetails";
 import Settings from "./pages/Settings";
 import Dashboard from "./pages/Dashboard";
-import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/layout/AppLayout";
