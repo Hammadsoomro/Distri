@@ -26,6 +26,7 @@ export interface User {
   passwordHash: string;
   role: Role;
   inbox: Message[]; // direct messages / system messages
+  avatar?: string | null; // data URL or image URL
 }
 
 export interface DistributionJob {
