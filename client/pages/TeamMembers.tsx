@@ -81,7 +81,7 @@ export default function TeamMembers() {
               </CardContent>
             </Card>
           );
-        }))}
+        })}
 
         {members.length === 0 && <p className="text-white/60">No members yet.</p>}
       </div>
