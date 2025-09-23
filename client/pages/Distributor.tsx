@@ -196,6 +196,9 @@ export default function Distributor() {
       }
     }
 
+    // Only show pending in queue
+    rows = rows.filter((r) => r.status === "pending");
+
     const q = search.trim().toLowerCase();
     if (!q) return rows;
     return rows.filter(
@@ -205,7 +208,7 @@ export default function Distributor() {
         r.index.toString() === q ||
         r.status.toLowerCase().includes(q),
     );
-  }, [job, memberById, search, historyJobs, distributorText, linesPerTick, selected]);
+  }, [job, memberById, search, historyJobs, distAccum, linesPerTick, selected]);
 
   return (
     <div className="space-y-6">
