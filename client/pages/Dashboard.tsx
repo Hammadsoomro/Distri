@@ -88,13 +88,10 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl sm:text-3xl font-extrabold">
-        Sales team performance management KPI dashboard
+      <h1 className="text-4xl sm:text-5xl font-extrabold">
+        Team-Work
       </h1>
-      <p className="text-white/70 text-sm max-w-3xl">
-        This dashboard helps sales team managers display and review performance
-        rankings.
-      </p>
+      <p className="text-xl text-white/70 max-w-3xl">Per-line distribution for your team — fast, reliable, and configurable.</p>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-4">
