@@ -28,15 +28,13 @@ export default function Dashboard() {
   useEffect(() => {
     TeamApi.list()
       .then((res) => {
-        const members = res.members
-          .slice(0, 5)
-          .map((m) => ({
-            id: m.id,
-            name: m.name,
-            sales: 20000 + Math.floor(Math.random() * 10000),
-            target: 15000 + Math.floor(Math.random() * 2000),
-            img: undefined,
-          }));
+        const members = res.members.slice(0, 5).map((m) => ({
+          id: m.id,
+          name: m.name,
+          sales: 20000 + Math.floor(Math.random() * 10000),
+          target: 15000 + Math.floor(Math.random() * 2000),
+          img: undefined,
+        }));
         setLeaders(members);
       })
       .catch(() => {
@@ -88,10 +86,10 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-4xl sm:text-5xl font-extrabold">
-        Team-Work
-      </h1>
-      <p className="text-xl text-white/70 max-w-3xl">Per-line distribution for your team — fast, reliable, and configurable.</p>
+      <h1 className="text-4xl sm:text-5xl font-extrabold">Team-Work</h1>
+      <p className="text-xl text-white/70 max-w-3xl">
+        Per-line distribution for your team — fast, reliable, and configurable.
+      </p>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-4">
