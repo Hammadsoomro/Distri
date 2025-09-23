@@ -126,7 +126,7 @@ export default function Distributor() {
   }, [members]);
 
   const queueRows = useMemo(() => {
-    if (!job && (!historyJobs || historyJobs.length === 0) && !distributorText.trim()) return [] as {
+    if (!job && (!historyJobs || historyJobs.length === 0) && !distAccum.trim()) return [] as {
       index: number;
       line: string;
       userId: string;
