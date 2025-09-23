@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { TeamApi } from "@/lib/api";
+import SVGChart from "./DashboardChart";
 
 function Ring({ value }: { value: number }) {
   const pct = Math.max(0, Math.min(100, value));
