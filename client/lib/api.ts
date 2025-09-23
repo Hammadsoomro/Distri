@@ -74,6 +74,12 @@ export const AuthApi = {
     const res = await api<{ user: PublicUser }>("/api/auth/me");
     return res.user;
   },
+  async updateProfile(input: { name?: string; password?: string }) {
+    return api<{ user: PublicUser }>("/api/auth/update", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
 };
 
 export const TeamApi = {

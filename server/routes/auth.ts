@@ -50,3 +50,20 @@ export const me: RequestHandler = (req, res) => {
   if (!u) return res.status(401).json({ error: "Unauthorized" });
   res.json({ user: publicUser(u) });
 };
+
+export const updateProfile: RequestHandler = (req, res) => {
+  const areq = req as any;
+  if (!areq.user) return res.status(401).json({ error: "Unauthorized" });
+  const { name, password } = req.body || {};
+  const user = areq.user as any;
+  if (typeof name === "string" && name.trim()) user.name = name.trim();
+  if (typeof password === "string" && password.trim()) user.passwordHash = hashPassword(password);
+  // persist into in-memory DB
+  const stored = db.users.get(user.id);
+  if (stored) {
+    stored.name = user.name;
+    if (user.passwordHash) stored.passwordHash = user.passwordHash;
+    db.users.set(user.id, stored);
+  }
+  res.json({ user: publicUser(user) });
+};

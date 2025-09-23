@@ -14,6 +14,9 @@ import Team from "./pages/Team";
 import Distributor from "./pages/Distributor";
 import Inbox from "./pages/Inbox";
 import Jobs from "./pages/Jobs";
+import JobDetails from "./pages/JobDetails";
+import Settings from "./pages/Settings";
+import Dashboard from "./pages/Dashboard";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
@@ -84,6 +87,22 @@ const App = () => (
                 element={
                   <RequireAuth>
                     <Chat />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/jobs/:id"
+                element={
+                  <RequireAuth role="admin">
+                    <JobDetails />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <RequireAuth>
+                    <Settings />
                   </RequireAuth>
                 }
               />
