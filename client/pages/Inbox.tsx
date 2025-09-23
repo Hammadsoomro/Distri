@@ -58,38 +58,55 @@ export default function Inbox() {
         </div>
         <div className="space-y-2 max-h-[60vh] overflow-auto pr-2">
           {lines.map((l) => (
-            <button
+            <div
               key={l.id}
-              onClick={async () => {
-                // optimistic update
-                const uid = user?.id || "";
-                setLines((prev) => prev.map((m) => (m.id === l.id ? { ...m, readBy: m.readBy.includes(uid) ? m.readBy : [...m.readBy, uid] } : m)));
-                try {
-                  await InboxApi.markRead([l.id]);
-                } catch {
-                  // reload on failure
-                  await load();
-                }
-              }}
-              className={`w-full text-left p-2 rounded bg-white/5 border border-white/10 flex justify-between items-start ${l.readBy.includes(user?.id || "") ? "opacity-60" : ""}`}
+              className={`p-2 rounded bg-white/5 border border-white/10 flex justify-between items-start ${l.readBy.includes(user?.id || "") ? "opacity-60" : ""}`}
             >
-              <div>
+              <div className="flex-1">
                 <div className="text-sm text-white/80">
                   {l.fromId || "System"}
                 </div>
-                <div className="mt-1">{l.text}</div>
+                <div className="mt-1 whitespace-pre-wrap">{l.text}</div>
                 <div className="text-xs text-white/60 mt-1">
                   {new Date(l.ts).toLocaleString()}
                 </div>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 items-end pl-3">
                 {!l.readBy.includes(user?.id || "") && (
                   <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded">
                     New
                   </span>
                 )}
+                <div className="flex gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(l.text);
+                      } catch {}
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={async () => {
+                      const uid = user?.id || "";
+                      setLines((prev) => prev.map((m) => (m.id === l.id ? { ...m, readBy: m.readBy.includes(uid) ? m.readBy : [...m.readBy, uid] } : m)));
+                      try {
+                        await InboxApi.markRead([l.id]);
+                      } catch {
+                        await load();
+                      }
+                    }}
+                  >
+                    Mark read
+                  </Button>
+                </div>
               </div>
-            </button>
+            </div>
           ))}
           {lines.length === 0 && (
             <p className="text-white/60">No messages yet.</p>
