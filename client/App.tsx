@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Team from "./pages/Team";
+import TeamMembers from "./pages/TeamMembers";
 import Distributor from "./pages/Distributor";
 import Inbox from "./pages/Inbox";
 import Jobs from "./pages/Jobs";
@@ -103,6 +104,14 @@ const App = () => (
                 element={
                   <RequireAuth>
                     <Inbox />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/members"
+                element={
+                  <RequireAuth>
+                    <TeamMembers />
                   </RequireAuth>
                 }
               />
