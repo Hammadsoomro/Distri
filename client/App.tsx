@@ -49,14 +49,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route
-                path="/team"
-                element={
-                  <RequireAuth role="admin">
-                    <Team />
-                  </RequireAuth>
-                }
-              />
+              {/* Team management moved into Settings; separate Team Members page available */}
               <Route
                 path="/distributor"
                 element={
