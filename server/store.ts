@@ -80,5 +80,6 @@ export function publicUser(u: User) {
     role: u.role,
     inboxCount: u.inbox.length,
     unreadCount: u.inbox.filter((m) => !m.readBy.includes(u.id)).length,
+    avatar: u.avatar || null,
   };
 }
