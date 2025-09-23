@@ -43,43 +43,44 @@ export default function Dashboard() {
 
   }, []);
 
-  const salesThisWeek = 155241;
-  const target = 155200;
-  const pct = Math.round((salesThisWeek / target) * 100);
+  const [range, setRange] = useState<"day"|"week"|"month">("day");
+  const salesToday = 5243;
+  const salesWeekly = 155241;
+  const salesMonthly = 655241;
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl sm:text-3xl font-extrabold">Sales team performance management KPI dashboard</h1>
       <p className="text-white/70 text-sm max-w-3xl">
-        This dashboard helps sales team managers display and review performance rankings. It shows weekly sales score, target percentage, total target, and team member stats.
+        This dashboard helps sales team managers display and review performance rankings.
       </p>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-4">
           <Card className="bg-white/5 border-white/10 text-white">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-white/70">Sales Done This Week</CardTitle>
+              <CardTitle className="text-sm text-white/70">Sales Done Today</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-extrabold tracking-tight">{salesThisWeek.toLocaleString()}</div>
+              <div className="text-3xl font-extrabold tracking-tight">{salesToday.toLocaleString()}</div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/5 border-white/10 text-white">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-white/70">Target</CardTitle>
+              <CardTitle className="text-sm text-white/70">Sales Done Weekly</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-extrabold tracking-tight">{target.toLocaleString()}</div>
+              <div className="text-3xl font-extrabold tracking-tight">{salesWeekly.toLocaleString()}</div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/5 border-white/10 text-white">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-white/70">% of Target</CardTitle>
+              <CardTitle className="text-sm text-white/70">Sales Done Monthly</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-center py-6">
-              <Ring value={pct} />
+              <div className="text-3xl font-extrabold tracking-tight">{salesMonthly.toLocaleString()}</div>
             </CardContent>
           </Card>
         </div>
