@@ -20,6 +20,7 @@ export interface PublicUser {
   role: Role;
   inboxCount: number;
   unreadCount: number;
+  avatar?: string | null;
 }
 
 export interface AuthResponse {
