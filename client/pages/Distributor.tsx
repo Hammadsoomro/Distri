@@ -36,7 +36,8 @@ export default function Distributor() {
   const [job, setJob] = useState<Job | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [historyJobs, setHistoryJobs] = useState<{ id: string; status: Job["status"]; queue: { lineNumber: number; line: string; userId: string; status: "sent" | "pending" | "failed"; }[] }[]>([]);
+  const [historySearch, setHistorySearch] = useState("");
+  const [historyJobs, setHistoryJobs] = useState<{ id: string; status: Job["status"]; queue: { lineNumber: number; line: string; userId: string; status: "sent" | "pending" | "failed"; sentAt?: number }[] }[]>([]);
 
   const loadMembers = async () => {
     const res = await TeamApi.list();
@@ -209,6 +210,52 @@ export default function Distributor() {
         r.status.toLowerCase().includes(q),
     );
   }, [job, memberById, search, historyJobs, distAccum, linesPerTick, selected]);
+
+  const historyRows = useMemo(() => {
+    type R = { index: number; line: string; userId: string; userLabel: string; status: "sent" | "failed"; sentAt?: number };
+    const rows: R[] = [];
+
+    // Current job
+    if (job) {
+      if (job.queue && job.queue.length) {
+        for (const q of job.queue) {
+          if (q.status === "pending") continue;
+          const m = memberById[q.userId];
+          const userLabel = m ? `${m.name} (${m.email})` : q.userId;
+          rows.push({ index: q.lineNumber, line: q.line, userId: q.userId, userLabel, status: q.status as any, sentAt: (q as any).sentAt });
+        }
+      } else {
+        const T = job.targets.length || 1;
+        const L = job.linesPerTick;
+        const round = T * L;
+        for (let i = 0; i < Math.min(job.nextIndex, job.textLines.length); i++) {
+          const inRound = i % round;
+          const targetIdx = Math.floor(inRound / L);
+          const userId = job.targets[targetIdx] || job.targets[0];
+          const m = memberById[userId];
+          const userLabel = m ? `${m.name} (${m.email})` : userId;
+          rows.push({ index: i + 1, line: job.textLines[i], userId, userLabel, status: "sent" });
+        }
+      }
+    }
+
+    // Previous jobs
+    for (const hj of historyJobs) {
+      for (const q of hj.queue || []) {
+        if (q.status === "pending") continue;
+        const m = memberById[q.userId];
+        const userLabel = m ? `${m.name} (${m.email})` : q.userId;
+        rows.push({ index: q.lineNumber, line: q.line, userId: q.userId, userLabel, status: q.status as any, sentAt: (q as any).sentAt });
+      }
+    }
+
+    // Sort by time desc if available
+    rows.sort((a, b) => (b.sentAt || 0) - (a.sentAt || 0));
+
+    const q = historySearch.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) => r.line.toLowerCase().includes(q) || r.userLabel.toLowerCase().includes(q) || r.index.toString() === q || r.status.toLowerCase().includes(q));
+  }, [job, historyJobs, memberById, historySearch]);
 
   return (
     <div className="space-y-6">
@@ -414,6 +461,54 @@ export default function Distributor() {
                 </TableBody>
               </Table>
             </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/5 border-white/10 text-white">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <CardTitle>History</CardTitle>
+            <CardDescription className="text-white/70">Sent lines (database)</CardDescription>
+          </div>
+          <div className="w-full sm:w-64">
+            <Input
+              placeholder="Search line, user, status..."
+              value={historySearch}
+              onChange={(e) => setHistorySearch(e.target.value)}
+              className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border border-white/10 bg-white/5">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[90px]">Line #</TableHead>
+                  <TableHead>Line</TableHead>
+                  <TableHead className="w-[280px]">User</TableHead>
+                  <TableHead className="w-[120px]">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {historyRows.map((r, i) => (
+                  <TableRow key={`${r.index}-${r.userId}-h-${i}`}>
+                    <TableCell>#{r.index}</TableCell>
+                    <TableCell className="text-white/90 whitespace-pre-wrap">{r.line}</TableCell>
+                    <TableCell className="text-white/80">{r.userLabel}</TableCell>
+                    <TableCell>
+                      <span className={r.status === "sent" ? "text-green-400" : "text-red-400"}>{r.status}</span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {historyRows.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-white/60">No matching rows</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
