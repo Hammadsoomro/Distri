@@ -71,7 +71,7 @@ function Hero() {
         New App
       </p>
       <h2 className="mt-3 text-3xl font-extrabold">
-        Line Distributor – For your team
+        Team-Work – For your team
       </h2>
       <p className="mt-2 text-white/70">
         Per-line text distribution with smart timers. Beautiful, fast, and
