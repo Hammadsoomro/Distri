@@ -106,13 +106,21 @@ export const DistributorApi = {
     return api<JobResponse>(`/api/jobs/${id}/cancel`, { method: "POST" });
   },
   async listQueues() {
-    return api<JobQueueHistoryResponse>("/api/jobs/history");
+    try {
+      return await api<JobQueueHistoryResponse>("/api/jobs/history");
+    } catch {
+      return { jobs: [] };
+    }
   },
 };
 
 export const InboxApi = {
   async get() {
-    return api<InboxResponse>("/api/inbox");
+    try {
+      return await api<InboxResponse>("/api/inbox");
+    } catch {
+      return { inbox: [] } as any;
+    }
   },
   async clear() {
     return api<{ ok: true }>("/api/inbox/clear", { method: "POST" });
