@@ -14,6 +14,7 @@ import Team from "./pages/Team";
 import Distributor from "./pages/Distributor";
 import Inbox from "./pages/Inbox";
 import Jobs from "./pages/Jobs";
+import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -91,6 +92,14 @@ const App = () => (
                 element={
                   <RequireAuth>
                     <Inbox />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <RequireAuth>
+                    <Dashboard />
                   </RequireAuth>
                 }
               />
