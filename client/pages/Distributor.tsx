@@ -219,44 +219,43 @@ export default function Distributor() {
             Paste lines here. If first 15 words match, duplicates are removed live.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label className="text-white">Input</Label>
-            <Textarea
-              value={rawInput}
-              onChange={(e) => setRawInput(e.target.value)}
-              rows={8}
-              className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
-              placeholder={"Paste or type lines here for de-duplication"}
-            />
-          </div>
-          <div className="flex items-center justify-between text-sm text-white/70">
-            <span>Kept lines: {dedupText ? dedupText.split("\n").length : 0}</span>
-            <div className="flex items-center gap-2">
-              {!locked ? (
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-white">Input</Label>
+              <Textarea
+                value={rawInput}
+                onChange={(e) => setRawInput(e.target.value)}
+                rows={10}
+                className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
+                placeholder={"Paste or type lines here for de-duplication"}
+              />
+              <div className="flex items-center justify-between text-sm text-white/70">
+                <span>Kept lines: {dedupText ? dedupText.split("\n").length : 0}</span>
                 <Button
                   variant="secondary"
                   type="button"
-                  onClick={() => {
-                    setLocked(true);
-                    setLockedText(dedupText);
-                  }}
+                  disabled={!dedupText.trim()}
+                  onClick={() =>
+                    setDistAccum((prev) => {
+                      const add = dedupText.trim();
+                      if (!add) return prev;
+                      return prev ? `${prev}\n${add}` : add;
+                    })
+                  }
                 >
                   Add to Distributor
                 </Button>
-              ) : (
-                <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={() => {
-                    setLocked(false);
-                    setLockedText("");
-                  }}
-                >
-                  Unlock
-                </Button>
-              )}
-              {locked && <span className="text-green-300">Saved</span>}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white">Live Preview</Label>
+              <Textarea
+                value={dedupText}
+                readOnly
+                rows={10}
+                className="bg-white/10 text-white border-white/20"
+              />
             </div>
           </div>
         </CardContent>
