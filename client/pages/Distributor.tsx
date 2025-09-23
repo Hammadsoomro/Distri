@@ -37,6 +37,7 @@ export default function Distributor() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [historySearch, setHistorySearch] = useState("");
+  const [activeJobMeta, setActiveJobMeta] = useState<{ id: string; total: number } | null>(null);
   const [historyJobs, setHistoryJobs] = useState<{ id: string; status: Job["status"]; queue: { lineNumber: number; line: string; userId: string; status: "sent" | "pending" | "failed"; sentAt?: number }[] }[]>([]);
 
   const loadMembers = async () => {
@@ -74,6 +75,15 @@ export default function Distributor() {
     return () => clearInterval(t);
   }, [job?.id]);
 
+  useEffect(() => {
+    if (!job || !activeJobMeta || job.id !== activeJobMeta.id) return;
+    const remaining = job.textLines.slice(job.nextIndex).join("\n");
+    const currentLines = distAccum.replace(/\r\n/g, "\n").split("\n");
+    const extras = currentLines.slice(activeJobMeta.total);
+    const merged = remaining ? [remaining, ...extras].filter(Boolean).join("\n") : extras.join("\n");
+    setDistAccum(merged);
+  }, [job?.nextIndex]);
+
   const dedupText = useMemo(() => {
     const lines = rawInput.replace(/\r\n/g, "\n").split("\n");
     const seen = new Set<string>();
@@ -108,6 +118,7 @@ export default function Distributor() {
         targetIds,
       });
       setJob(res.job);
+      setActiveJobMeta({ id: res.job.id, total: res.job.textLines.length });
     } catch (e: any) {
       setError(e.message || "Failed to start job");
     }
