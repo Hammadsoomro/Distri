@@ -4,7 +4,6 @@
   publish = "dist/spa"
 
 [functions]
-  external_node_modules = ["express"]
   node_bundler = "esbuild"
 
 [build.environment]
