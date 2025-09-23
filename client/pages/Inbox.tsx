@@ -94,7 +94,18 @@ export default function Inbox() {
                     size="sm"
                     onClick={async () => {
                       const uid = user?.id || "";
-                      setLines((prev) => prev.map((m) => (m.id === l.id ? { ...m, readBy: m.readBy.includes(uid) ? m.readBy : [...m.readBy, uid] } : m)));
+                      setLines((prev) =>
+                        prev.map((m) =>
+                          m.id === l.id
+                            ? {
+                                ...m,
+                                readBy: m.readBy.includes(uid)
+                                  ? m.readBy
+                                  : [...m.readBy, uid],
+                              }
+                            : m,
+                        ),
+                      );
                       try {
                         await InboxApi.markRead([l.id]);
                       } catch {

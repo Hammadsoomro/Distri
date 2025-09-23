@@ -37,8 +37,23 @@ export default function Distributor() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [historySearch, setHistorySearch] = useState("");
-  const [activeJobMeta, setActiveJobMeta] = useState<{ id: string; total: number } | null>(null);
-  const [historyJobs, setHistoryJobs] = useState<{ id: string; status: Job["status"]; queue: { lineNumber: number; line: string; userId: string; status: "sent" | "pending" | "failed"; sentAt?: number }[] }[]>([]);
+  const [activeJobMeta, setActiveJobMeta] = useState<{
+    id: string;
+    total: number;
+  } | null>(null);
+  const [historyJobs, setHistoryJobs] = useState<
+    {
+      id: string;
+      status: Job["status"];
+      queue: {
+        lineNumber: number;
+        line: string;
+        userId: string;
+        status: "sent" | "pending" | "failed";
+        sentAt?: number;
+      }[];
+    }[]
+  >([]);
 
   const loadMembers = async () => {
     const res = await TeamApi.list();
@@ -80,7 +95,9 @@ export default function Distributor() {
     const remaining = job.textLines.slice(job.nextIndex).join("\n");
     const currentLines = distAccum.replace(/\r\n/g, "\n").split("\n");
     const extras = currentLines.slice(activeJobMeta.total);
-    const merged = remaining ? [remaining, ...extras].filter(Boolean).join("\n") : extras.join("\n");
+    const merged = remaining
+      ? [remaining, ...extras].filter(Boolean).join("\n")
+      : extras.join("\n");
     setDistAccum(merged);
   }, [job?.nextIndex]);
 
@@ -105,7 +122,6 @@ export default function Distributor() {
     }
     return kept.join("\n");
   }, [rawInput]);
-
 
   const start = async () => {
     setError(null);
@@ -141,13 +157,14 @@ export default function Distributor() {
   }, [members]);
 
   const queueRows = useMemo(() => {
-    if (!job && (!historyJobs || historyJobs.length === 0) && !distAccum.trim()) return [] as {
-      index: number;
-      line: string;
-      userId: string;
-      userLabel: string;
-      status: "sent" | "pending" | "failed";
-    }[];
+    if (!job && (!historyJobs || historyJobs.length === 0) && !distAccum.trim())
+      return [] as {
+        index: number;
+        line: string;
+        userId: string;
+        userLabel: string;
+        status: "sent" | "pending" | "failed";
+      }[];
 
     let rows: {
       index: number;
@@ -180,7 +197,13 @@ export default function Distributor() {
         const m = memberById[userId];
         const userLabel = m ? `${m.name} (${m.email})` : userId;
         const status = i < job.nextIndex ? "sent" : "pending";
-        rows.push({ index: i + 1, line: job.textLines[i], userId, userLabel, status });
+        rows.push({
+          index: i + 1,
+          line: job.textLines[i],
+          userId,
+          userLabel,
+          status,
+        });
       }
     }
 
@@ -193,10 +216,22 @@ export default function Distributor() {
       for (let i = 0; i < previewLines.length; i++) {
         const inRound = i % round;
         const targetIdx = Math.floor(inRound / L);
-        const userId = (targetsArray[targetIdx] || targetsArray[0]) as string | undefined;
+        const userId = (targetsArray[targetIdx] || targetsArray[0]) as
+          | string
+          | undefined;
         const m = userId ? memberById[userId] : undefined;
-        const userLabel = userId ? (m ? `${m.name} (${m.email})` : userId) : "—";
-        rows.push({ index: i + 1, line: previewLines[i], userId: userId || "", userLabel, status: "pending" });
+        const userLabel = userId
+          ? m
+            ? `${m.name} (${m.email})`
+            : userId
+          : "—";
+        rows.push({
+          index: i + 1,
+          line: previewLines[i],
+          userId: userId || "",
+          userLabel,
+          status: "pending",
+        });
       }
     }
 
@@ -215,7 +250,14 @@ export default function Distributor() {
   }, [job, memberById, search, historyJobs, distAccum, linesPerTick, selected]);
 
   const historyRows = useMemo(() => {
-    type R = { index: number; line: string; userId: string; userLabel: string; status: "sent" | "failed"; sentAt?: number };
+    type R = {
+      index: number;
+      line: string;
+      userId: string;
+      userLabel: string;
+      status: "sent" | "failed";
+      sentAt?: number;
+    };
     const rows: R[] = [];
 
     // Current job
@@ -225,19 +267,36 @@ export default function Distributor() {
           if (q.status === "pending") continue;
           const m = memberById[q.userId];
           const userLabel = m ? `${m.name} (${m.email})` : q.userId;
-          rows.push({ index: q.lineNumber, line: q.line, userId: q.userId, userLabel, status: q.status as any, sentAt: (q as any).sentAt });
+          rows.push({
+            index: q.lineNumber,
+            line: q.line,
+            userId: q.userId,
+            userLabel,
+            status: q.status as any,
+            sentAt: (q as any).sentAt,
+          });
         }
       } else {
         const T = job.targets.length || 1;
         const L = job.linesPerTick;
         const round = T * L;
-        for (let i = 0; i < Math.min(job.nextIndex, job.textLines.length); i++) {
+        for (
+          let i = 0;
+          i < Math.min(job.nextIndex, job.textLines.length);
+          i++
+        ) {
           const inRound = i % round;
           const targetIdx = Math.floor(inRound / L);
           const userId = job.targets[targetIdx] || job.targets[0];
           const m = memberById[userId];
           const userLabel = m ? `${m.name} (${m.email})` : userId;
-          rows.push({ index: i + 1, line: job.textLines[i], userId, userLabel, status: "sent" });
+          rows.push({
+            index: i + 1,
+            line: job.textLines[i],
+            userId,
+            userLabel,
+            status: "sent",
+          });
         }
       }
     }
@@ -248,7 +307,14 @@ export default function Distributor() {
         if (q.status === "pending") continue;
         const m = memberById[q.userId];
         const userLabel = m ? `${m.name} (${m.email})` : q.userId;
-        rows.push({ index: q.lineNumber, line: q.line, userId: q.userId, userLabel, status: q.status as any, sentAt: (q as any).sentAt });
+        rows.push({
+          index: q.lineNumber,
+          line: q.line,
+          userId: q.userId,
+          userLabel,
+          status: q.status as any,
+          sentAt: (q as any).sentAt,
+        });
       }
     }
 
@@ -257,7 +323,13 @@ export default function Distributor() {
 
     const q = historySearch.trim().toLowerCase();
     if (!q) return rows;
-    return rows.filter((r) => r.line.toLowerCase().includes(q) || r.userLabel.toLowerCase().includes(q) || r.index.toString() === q || r.status.toLowerCase().includes(q));
+    return rows.filter(
+      (r) =>
+        r.line.toLowerCase().includes(q) ||
+        r.userLabel.toLowerCase().includes(q) ||
+        r.index.toString() === q ||
+        r.status.toLowerCase().includes(q),
+    );
   }, [job, historyJobs, memberById, historySearch]);
 
   return (
@@ -266,7 +338,8 @@ export default function Distributor() {
         <CardHeader>
           <CardTitle>De-Duplication</CardTitle>
           <CardDescription className="text-white/70">
-            Paste lines here. If first 15 words match, duplicates are removed live.
+            Paste lines here. If first 15 words match, duplicates are removed
+            live.
           </CardDescription>
         </CardHeader>
         <CardContent className="max-h-[60vh] overflow-y-auto pr-2">
@@ -281,7 +354,9 @@ export default function Distributor() {
                 placeholder={"Paste or type lines here for de-duplication"}
               />
               <div className="flex items-center justify-between text-sm text-white/70">
-                <span>Kept lines: {dedupText ? dedupText.split("\n").length : 0}</span>
+                <span>
+                  Kept lines: {dedupText ? dedupText.split("\n").length : 0}
+                </span>
                 <Button
                   variant="secondary"
                   type="button"
@@ -290,16 +365,21 @@ export default function Distributor() {
                     setDistAccum((prev) => {
                       const add = dedupText.trim();
                       if (!add) return prev;
-                      const prevLines = prev ? prev.replace(/\r\n/g, "\n").split("\n") : [];
+                      const prevLines = prev
+                        ? prev.replace(/\r\n/g, "\n").split("\n")
+                        : [];
                       const addLines = add.replace(/\r\n/g, "\n").split("\n");
-                      const key = (s: string) => s
-                        .trim()
-                        .replace(/[\t]+/g, " ")
-                        .split(/\s+/)
-                        .slice(0, 15)
-                        .map((w) => w.replace(/^[^\w]+|[^\w]+$/g, "").toLowerCase())
-                        .filter(Boolean)
-                        .join(" ");
+                      const key = (s: string) =>
+                        s
+                          .trim()
+                          .replace(/[\t]+/g, " ")
+                          .split(/\s+/)
+                          .slice(0, 15)
+                          .map((w) =>
+                            w.replace(/^[^\w]+|[^\w]+$/g, "").toLowerCase(),
+                          )
+                          .filter(Boolean)
+                          .join(" ");
                       const seen = new Set(prevLines.map(key).filter(Boolean));
                       const uniques = addLines.filter((l) => {
                         const k = key(l);
@@ -308,7 +388,9 @@ export default function Distributor() {
                         return true;
                       });
                       if (uniques.length === 0) return prev;
-                      return prevLines.length ? `${prev}\n${uniques.join("\n")}` : uniques.join("\n");
+                      return prevLines.length
+                        ? `${prev}\n${uniques.join("\n")}`
+                        : uniques.join("\n");
                     })
                   }
                 >
@@ -340,10 +422,16 @@ export default function Distributor() {
           {job && job.status === "running" && (
             <div className="flex items-center justify-between rounded border border-white/10 bg-white/5 p-3">
               <div>
-                <p className="font-medium">Job running • {job.linesPerTick} lines • {job.intervalSec}s</p>
-                <p className="text-white/60 text-sm">You can start another job while this runs. Queue is below.</p>
+                <p className="font-medium">
+                  Job running • {job.linesPerTick} lines • {job.intervalSec}s
+                </p>
+                <p className="text-white/60 text-sm">
+                  You can start another job while this runs. Queue is below.
+                </p>
               </div>
-              <Button variant="destructive" onClick={() => cancel(job.id)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => cancel(job.id)}>
+                Cancel
+              </Button>
             </div>
           )}
 
@@ -417,7 +505,9 @@ export default function Distributor() {
             <Button
               type="button"
               onClick={start}
-              disabled={!distAccum.trim() || !Object.values(selected).some(Boolean)}
+              disabled={
+                !distAccum.trim() || !Object.values(selected).some(Boolean)
+              }
             >
               Start
             </Button>
@@ -452,46 +542,53 @@ export default function Distributor() {
         </CardHeader>
         <CardContent className="max-h-[60vh] overflow-y-auto pr-2">
           <div className="rounded-md border border-white/10 bg-white/5">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[90px]">Line #</TableHead>
-                    <TableHead>Line</TableHead>
-                    <TableHead className="w-[280px]">User</TableHead>
-                    <TableHead className="w-[120px]">Status</TableHead>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[90px]">Line #</TableHead>
+                  <TableHead>Line</TableHead>
+                  <TableHead className="w-[280px]">User</TableHead>
+                  <TableHead className="w-[120px]">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {queueRows.map((r) => (
+                  <TableRow key={`${r.index}-${r.userId}`}>
+                    <TableCell>#{r.index}</TableCell>
+                    <TableCell className="text-white/90 whitespace-pre-wrap">
+                      {r.line}
+                    </TableCell>
+                    <TableCell className="text-white/80">
+                      {r.userLabel}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={
+                          r.status === "sent"
+                            ? "text-green-400"
+                            : r.status === "failed"
+                              ? "text-red-400"
+                              : "text-yellow-300"
+                        }
+                      >
+                        {r.status}
+                      </span>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {queueRows.map((r) => (
-                    <TableRow key={`${r.index}-${r.userId}`}>
-                      <TableCell>#{r.index}</TableCell>
-                      <TableCell className="text-white/90 whitespace-pre-wrap">{r.line}</TableCell>
-                      <TableCell className="text-white/80">{r.userLabel}</TableCell>
-                      <TableCell>
-                        <span
-                          className={
-                            r.status === "sent"
-                              ? "text-green-400"
-                              : r.status === "failed"
-                                ? "text-red-400"
-                                : "text-yellow-300"
-                          }
-                        >
-                          {r.status}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {queueRows.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-white/60">
-                        No matching rows
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+                {queueRows.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-white/60"
+                    >
+                      No matching rows
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -499,7 +596,9 @@ export default function Distributor() {
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <CardTitle>History</CardTitle>
-            <CardDescription className="text-white/70">Sent lines (database)</CardDescription>
+            <CardDescription className="text-white/70">
+              Sent lines (database)
+            </CardDescription>
           </div>
           <div className="w-full sm:w-64">
             <Input
@@ -525,16 +624,33 @@ export default function Distributor() {
                 {historyRows.map((r, i) => (
                   <TableRow key={`${r.index}-${r.userId}-h-${i}`}>
                     <TableCell>#{r.index}</TableCell>
-                    <TableCell className="text-white/90 whitespace-pre-wrap">{r.line}</TableCell>
-                    <TableCell className="text-white/80">{r.userLabel}</TableCell>
+                    <TableCell className="text-white/90 whitespace-pre-wrap">
+                      {r.line}
+                    </TableCell>
+                    <TableCell className="text-white/80">
+                      {r.userLabel}
+                    </TableCell>
                     <TableCell>
-                      <span className={r.status === "sent" ? "text-green-400" : "text-red-400"}>{r.status}</span>
+                      <span
+                        className={
+                          r.status === "sent"
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }
+                      >
+                        {r.status}
+                      </span>
                     </TableCell>
                   </TableRow>
                 ))}
                 {historyRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-white/60">No matching rows</TableCell>
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-white/60"
+                    >
+                      No matching rows
+                    </TableCell>
                   </TableRow>
                 )}
               </TableBody>

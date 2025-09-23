@@ -32,7 +32,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Request notification permission early
     try {
-      if (typeof Notification !== "undefined" && Notification.permission === "default") {
+      if (
+        typeof Notification !== "undefined" &&
+        Notification.permission === "default"
+      ) {
         Notification.requestPermission().catch(() => {});
       }
     } catch {}
@@ -46,7 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let t: any;
     let lastCount = 0;
-    const beepSrc = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABYAZGF0YQAAAAA="; // tiny silent/beep placeholder
+    const beepSrc =
+      "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABYAZGF0YQAAAAA="; // tiny silent/beep placeholder
     const audio = new Audio(beepSrc);
     async function poll() {
       try {
@@ -66,9 +70,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await audio.play().catch(() => {});
           } catch {}
           try {
-            if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+            if (
+              typeof Notification !== "undefined" &&
+              Notification.permission === "granted"
+            ) {
               new Notification("Team-Work", {
-                body: last?.text ? (last.text.length > 60 ? last.text.slice(0, 57) + "..." : last.text) : `${delta} new message(s)`,
+                body: last?.text
+                  ? last.text.length > 60
+                    ? last.text.slice(0, 57) + "..."
+                    : last.text
+                  : `${delta} new message(s)`,
                 tag: "team-work-inbox",
               });
             }

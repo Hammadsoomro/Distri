@@ -41,7 +41,9 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     res = await fetch(url, { ...init, headers, signal: controller.signal });
   } catch (e: any) {
     clearTimeout(timeout);
-    throw new Error("Network error. Please check your connection and try again.");
+    throw new Error(
+      "Network error. Please check your connection and try again.",
+    );
   }
   clearTimeout(timeout);
   if (!res.ok) {
