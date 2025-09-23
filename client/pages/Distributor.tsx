@@ -106,7 +106,6 @@ export default function Distributor() {
         targetIds,
       });
       setJob(res.job);
-      if (!locked) setRawInput("");
     } catch (e: any) {
       setError(e.message || "Failed to start job");
     }
