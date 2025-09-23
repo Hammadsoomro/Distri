@@ -346,7 +346,7 @@ export default function Distributor() {
           <Button
             type="button"
             onClick={start}
-            disabled={!distributorText.trim() || !Object.values(selected).some(Boolean)}
+            disabled={!distAccum.trim() || !Object.values(selected).some(Boolean)}
           >
             Start
           </Button>
