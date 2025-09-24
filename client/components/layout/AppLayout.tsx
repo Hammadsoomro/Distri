@@ -54,6 +54,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 current={loc.pathname.startsWith("/dashboard")}
               />
             )}
+            {user && (
+              <NavLink
+                to="/sales-tracker"
+                label="Sales tracker"
+                current={loc.pathname.startsWith("/sales-tracker")}
+              />
+            )}
             {user?.role === "admin" && (
               <>
                 <NavLink
