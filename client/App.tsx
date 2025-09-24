@@ -18,6 +18,7 @@ import Jobs from "./pages/Jobs";
 import JobDetails from "./pages/JobDetails";
 import Settings from "./pages/Settings";
 import Dashboard from "./pages/Dashboard";
+import SalesTracker from "./pages/SalesTracker";
 import Chat from "./pages/Chat";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -124,6 +125,14 @@ const App = () => (
                 }
               />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route
+                path="/sales-tracker"
+                element={
+                  <RequireAuth>
+                    <SalesTracker />
+                  </RequireAuth>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
