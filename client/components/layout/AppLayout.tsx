@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -36,20 +37,32 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-white/5 bg-white/5 border-b border-white/10">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-primary shadow-lg shadow-primary/30" />
+            <img
+              src="/placeholder.svg"
+              alt="Team-Work logo"
+              className="h-8 w-8 rounded"
+            />
             <span className="font-extrabold tracking-tight text-lg">
-              Line Distributor
+              Team-Work
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
-            <NavLink to="/" label="Home" current={loc.pathname === "/"} />
+            {user && (
+              <NavLink
+                to="/dashboard"
+                label="Dashboard"
+                current={loc.pathname.startsWith("/dashboard")}
+              />
+            )}
+            {user && (
+              <NavLink
+                to="/sales-tracker"
+                label="Sales tracker"
+                current={loc.pathname.startsWith("/sales-tracker")}
+              />
+            )}
             {user?.role === "admin" && (
               <>
-                <NavLink
-                  to="/team"
-                  label="Team"
-                  current={loc.pathname.startsWith("/team")}
-                />
                 <NavLink
                   to="/distributor"
                   label="Distributor"
@@ -76,6 +89,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 current={loc.pathname.startsWith("/inbox")}
               />
             )}
+            {user && (
+              <NavLink
+                to="/members"
+                label="Team members"
+                current={loc.pathname.startsWith("/members")}
+              />
+            )}
           </nav>
           <div className="flex items-center gap-2">
             {!user ? (
@@ -91,16 +111,24 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </>
             ) : (
               <>
-                <span className="hidden sm:block text-white/70 text-sm mr-2">
-                  {user.name} ({user.role})
-                </span>
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="h-8 w-8 rounded-full mr-3 object-cover hidden sm:inline-block"
+                  />
+                ) : (
+                  <span className="hidden sm:block text-white/70 text-sm mr-2">
+                    {user.name} ({user.role})
+                  </span>
+                )}
                 <Button
-                  variant="secondary"
-                  onClick={() =>
-                    navigate(user.role === "admin" ? "/distributor" : "/inbox")
-                  }
+                  variant="ghost"
+                  size="icon"
+                  className="text-white/80"
+                  onClick={() => navigate("/settings")}
                 >
-                  Dashboard
+                  <Settings />
                 </Button>
                 <Button
                   variant="ghost"
@@ -119,7 +147,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
       <main className="container mx-auto px-4 py-8">{children}</main>
       <footer className="mt-16 border-t border-white/10 py-8 text-center text-white/60 text-sm">
-        © {new Date().getFullYear()} Line Distributor • Built for teams
+        © {new Date().getFullYear()} Team-Work • Built for teams
       </footer>
     </div>
   );

@@ -4,9 +4,15 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { authMiddleware } from "./auth";
-import { adminSetup, login, me } from "./routes/auth";
+import { adminSetup, login, me, updateProfile } from "./routes/auth";
 import { listTeam, createMember, deleteMember } from "./routes/team";
-import { createJob, listJobs, getJob, cancelJob } from "./routes/distributor";
+import {
+  createJob,
+  listJobs,
+  getJob,
+  cancelJob,
+  listQueues,
+} from "./routes/distributor";
 import { getInbox, clearInbox } from "./routes/inbox";
 import {
   listConversations,
@@ -41,6 +47,7 @@ export function createServer() {
   app.post("/api/auth/admin-setup", adminSetup);
   app.post("/api/auth/login", login);
   app.get("/api/auth/me", me);
+  app.post("/api/auth/update", updateProfile);
 
   // Team management (admin)
   app.get("/api/team", listTeam);
@@ -50,6 +57,7 @@ export function createServer() {
   // Distributor jobs (admin)
   app.post("/api/distribute", createJob);
   app.get("/api/jobs", listJobs);
+  app.get("/api/jobs/history", listQueues);
   app.get("/api/jobs/:id", getJob);
   app.post("/api/jobs/:id/cancel", cancelJob);
 

@@ -3,10 +3,8 @@ import { db, hashPassword, newId, publicUser } from "../store";
 import { requireUser, AuthedRequest } from "../auth";
 
 export const listTeam: RequestHandler = (req, res) => {
-  if (!requireUser(req as AuthedRequest, res, "admin")) return;
-  const members = Array.from(db.users.values())
-    .filter((u) => u.role === "member")
-    .map(publicUser);
+  if (!requireUser(req as AuthedRequest, res)) return;
+  const members = Array.from(db.users.values()).map(publicUser);
   res.json({ members });
 };
 

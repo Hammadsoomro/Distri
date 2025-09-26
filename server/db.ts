@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-const uri = process.env.MONGO_URI;
+const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
 
 export async function connectDB() {
   if (!uri) {
@@ -43,6 +43,7 @@ const UserSchema = new Schema({
 });
 
 const JobSchema = new Schema({
+  jobId: { type: String, index: true },
   ownerId: String,
   createdAt: Number,
   intervalSec: Number,
@@ -51,6 +52,21 @@ const JobSchema = new Schema({
   textLines: [String],
   nextIndex: Number,
   status: { type: String, enum: ["running", "completed", "cancelled"] },
+  queue: {
+    type: [
+      new Schema(
+        {
+          lineNumber: Number,
+          line: String,
+          userId: String,
+          status: { type: String, enum: ["sent", "pending", "failed"], default: "pending" },
+          sentAt: { type: Number },
+        },
+        { _id: false }
+      ),
+    ],
+    default: [],
+  },
 });
 
 export const MessageModel = mongoose.model("Message", MessageSchema);

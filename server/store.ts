@@ -26,6 +26,7 @@ export interface User {
   passwordHash: string;
   role: Role;
   inbox: Message[]; // direct messages / system messages
+  avatar?: string | null; // data URL or image URL
 }
 
 export interface DistributionJob {
@@ -79,5 +80,6 @@ export function publicUser(u: User) {
     role: u.role,
     inboxCount: u.inbox.length,
     unreadCount: u.inbox.filter((m) => !m.readBy.includes(u.id)).length,
+    avatar: u.avatar || null,
   };
 }

@@ -7,6 +7,7 @@ import {
   JobsListResponse,
   PublicUser,
   TeamListResponse,
+  JobQueueHistoryResponse,
 } from "@shared/api";
 
 const tokenKey = "auth_token";
@@ -30,7 +31,21 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   };
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(path, { ...init, headers });
+  const url = path.startsWith("http")
+    ? path
+    : new URL(path, window.location.origin).toString();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  let res: Response;
+  try {
+    res = await fetch(url, { ...init, headers, signal: controller.signal });
+  } catch (e: any) {
+    clearTimeout(timeout);
+    throw new Error(
+      "Network error. Please check your connection and try again.",
+    );
+  }
+  clearTimeout(timeout);
   if (!res.ok) {
     let message = `${res.status}`;
     try {
@@ -58,6 +73,16 @@ export const AuthApi = {
   async me() {
     const res = await api<{ user: PublicUser }>("/api/auth/me");
     return res.user;
+  },
+  async updateProfile(input: {
+    name?: string;
+    password?: string;
+    avatarBase64?: string;
+  }) {
+    return api<{ user: PublicUser }>("/api/auth/update", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
   },
 };
 
@@ -92,11 +117,22 @@ export const DistributorApi = {
   async cancelJob(id: string) {
     return api<JobResponse>(`/api/jobs/${id}/cancel`, { method: "POST" });
   },
+  async listQueues() {
+    try {
+      return await api<JobQueueHistoryResponse>("/api/jobs/history");
+    } catch {
+      return { jobs: [] };
+    }
+  },
 };
 
 export const InboxApi = {
   async get() {
-    return api<InboxResponse>("/api/inbox");
+    try {
+      return await api<InboxResponse>("/api/inbox");
+    } catch {
+      return { inbox: [] } as any;
+    }
   },
   async clear() {
     return api<{ ok: true }>("/api/inbox/clear", { method: "POST" });

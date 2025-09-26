@@ -11,9 +11,14 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Team from "./pages/Team";
+import TeamMembers from "./pages/TeamMembers";
 import Distributor from "./pages/Distributor";
 import Inbox from "./pages/Inbox";
 import Jobs from "./pages/Jobs";
+import JobDetails from "./pages/JobDetails";
+import Settings from "./pages/Settings";
+import Dashboard from "./pages/Dashboard";
+import SalesTracker from "./pages/SalesTracker";
 import Chat from "./pages/Chat";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -46,14 +51,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route
-                path="/team"
-                element={
-                  <RequireAuth role="admin">
-                    <Team />
-                  </RequireAuth>
-                }
-              />
+              {/* Team management moved into Settings; separate Team Members page available */}
               <Route
                 path="/distributor"
                 element={
@@ -87,6 +85,22 @@ const App = () => (
                 }
               />
               <Route
+                path="/jobs/:id"
+                element={
+                  <RequireAuth role="admin">
+                    <JobDetails />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <RequireAuth>
+                    <Settings />
+                  </RequireAuth>
+                }
+              />
+              <Route
                 path="/inbox"
                 element={
                   <RequireAuth>
@@ -94,7 +108,31 @@ const App = () => (
                   </RequireAuth>
                 }
               />
+              <Route
+                path="/members"
+                element={
+                  <RequireAuth>
+                    <TeamMembers />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <RequireAuth>
+                    <Dashboard />
+                  </RequireAuth>
+                }
+              />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route
+                path="/sales-tracker"
+                element={
+                  <RequireAuth>
+                    <SalesTracker />
+                  </RequireAuth>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
