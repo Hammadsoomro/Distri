@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,12 +10,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { TeamApi, DistributorApi } from "@/lib/api";
 import type { PublicUser, Job } from "@shared/api";
 
 export default function Distributor() {
   const [members, setMembers] = useState<PublicUser[]>([]);
-  const [text, setText] = useState("");
+  const [rawInput, setRawInput] = useState("");
+  const [distAccum, setDistAccum] = useState("");
   const intervalOptions = [30, 60, 120, 180, 240, 300] as const;
   const lineOptions = [1, 3, 5, 7, 10, 12, 15] as const;
   const [intervalSec, setIntervalSec] =
@@ -24,60 +34,383 @@ export default function Distributor() {
     useState<(typeof lineOptions)[number]>(1);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [job, setJob] = useState<Job | null>(null);
-  const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [historySearch, setHistorySearch] = useState("");
+  const [activeJobMeta, setActiveJobMeta] = useState<{
+    id: string;
+    total: number;
+  } | null>(null);
+  const [historyJobs, setHistoryJobs] = useState<
+    {
+      id: string;
+      status: Job["status"];
+      queue: {
+        lineNumber: number;
+        line: string;
+        userId: string;
+        status: "sent" | "pending" | "failed";
+        sentAt?: number;
+      }[];
+    }[]
+  >([]);
 
-  const load = async () => {
+  const loadMembers = async () => {
     const res = await TeamApi.list();
     setMembers(res.members);
   };
-  const loadJobs = async () => {
+  const loadRunningJob = async () => {
     const res = await DistributorApi.listJobs();
-    setJobs(res.jobs);
+    const running = res.jobs.find((j) => j.status === "running") || null;
+    setJob(running);
   };
 
   useEffect(() => {
-    load();
-    loadJobs();
+    loadMembers();
+    loadRunningJob();
+    const loadHistory = async () => {
+      try {
+        const res = await DistributorApi.listQueues();
+        setHistoryJobs(res.jobs);
+      } catch {}
+    };
+    loadHistory();
+    const t = setInterval(loadHistory, 3000);
+    return () => clearInterval(t);
   }, []);
+
   useEffect(() => {
     if (!job) return;
     const t = setInterval(async () => {
-      const res = await DistributorApi.getJob(job.id);
-      setJob(res.job);
-      loadJobs();
+      try {
+        const res = await DistributorApi.getJob(job.id);
+        setJob(res.job);
+      } catch {}
     }, 2000);
     return () => clearInterval(t);
   }, [job?.id]);
+
+  useEffect(() => {
+    if (!job || !activeJobMeta || job.id !== activeJobMeta.id) return;
+    const remaining = job.textLines.slice(job.nextIndex).join("\n");
+    const currentLines = distAccum.replace(/\r\n/g, "\n").split("\n");
+    const extras = currentLines.slice(activeJobMeta.total);
+    const merged = remaining
+      ? [remaining, ...extras].filter(Boolean).join("\n")
+      : extras.join("\n");
+    setDistAccum(merged);
+  }, [job?.nextIndex]);
+
+  const dedupText = useMemo(() => {
+    const lines = rawInput.replace(/\r\n/g, "\n").split("\n");
+    const seen = new Set<string>();
+    const kept: string[] = [];
+    for (const raw of lines) {
+      const trimmed = raw.trim();
+      if (!trimmed) continue;
+      const words = trimmed
+        .replace(/[\t]+/g, " ")
+        .split(/\s+/)
+        .slice(0, 15)
+        .map((w) => w.replace(/^[^\w]+|[^\w]+$/g, "").toLowerCase())
+        .filter(Boolean);
+      const key = words.join(" ");
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        kept.push(trimmed);
+      }
+    }
+    return kept.join("\n");
+  }, [rawInput]);
 
   const start = async () => {
     setError(null);
     try {
       const targetIds = Object.keys(selected).filter((k) => selected[k]);
       const res = await DistributorApi.createJob({
-        text,
+        text: distAccum,
         intervalSec,
         linesPerTick,
         targetIds,
       });
       setJob(res.job);
-      setText("");
+      setActiveJobMeta({ id: res.job.id, total: res.job.textLines.length });
     } catch (e: any) {
       setError(e.message || "Failed to start job");
     }
   };
 
   const cancel = async (id: string) => {
-    await DistributorApi.cancelJob(id);
-    const res = await DistributorApi.getJob(id);
-    setJob(res.job);
-    await loadJobs();
+    try {
+      await DistributorApi.cancelJob(id);
+      const res = await DistributorApi.getJob(id);
+      setJob(res.job);
+    } catch {}
   };
 
   const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }));
 
+  const memberById = useMemo(() => {
+    const map: Record<string, PublicUser> = {};
+    for (const m of members) map[m.id] = m;
+    return map;
+  }, [members]);
+
+  const queueRows = useMemo(() => {
+    if (!job && (!historyJobs || historyJobs.length === 0) && !distAccum.trim())
+      return [] as {
+        index: number;
+        line: string;
+        userId: string;
+        userLabel: string;
+        status: "sent" | "pending" | "failed";
+      }[];
+
+    let rows: {
+      index: number;
+      line: string;
+      userId: string;
+      userLabel: string;
+      status: "sent" | "pending" | "failed";
+    }[] = [];
+
+    if (job?.queue && job.queue.length) {
+      rows = job.queue.map((q) => {
+        const m = memberById[q.userId];
+        const userLabel = m ? `${m.name} (${m.email})` : q.userId;
+        return {
+          index: q.lineNumber,
+          line: q.line,
+          userId: q.userId,
+          userLabel,
+          status: q.status,
+        };
+      });
+    } else if (job) {
+      const T = job.targets.length || 1;
+      const L = job.linesPerTick;
+      const round = T * L;
+      for (let i = 0; i < job.textLines.length; i++) {
+        const inRound = i % round;
+        const targetIdx = Math.floor(inRound / L);
+        const userId = job.targets[targetIdx] || job.targets[0];
+        const m = memberById[userId];
+        const userLabel = m ? `${m.name} (${m.email})` : userId;
+        const status = i < job.nextIndex ? "sent" : "pending";
+        rows.push({
+          index: i + 1,
+          line: job.textLines[i],
+          userId,
+          userLabel,
+          status,
+        });
+      }
+    }
+
+    // If no running job, preview current Distributor text mapping (pending)
+    if (!job && distAccum.trim()) {
+      const previewLines = distAccum.replace(/\r\n/g, "\n").split("\n");
+      const targetsArray = Object.keys(selected).filter((k) => selected[k]);
+      const L = linesPerTick;
+      const round = (targetsArray.length || 1) * L;
+      for (let i = 0; i < previewLines.length; i++) {
+        const inRound = i % round;
+        const targetIdx = Math.floor(inRound / L);
+        const userId = (targetsArray[targetIdx] || targetsArray[0]) as
+          | string
+          | undefined;
+        const m = userId ? memberById[userId] : undefined;
+        const userLabel = userId
+          ? m
+            ? `${m.name} (${m.email})`
+            : userId
+          : "—";
+        rows.push({
+          index: i + 1,
+          line: previewLines[i],
+          userId: userId || "",
+          userLabel,
+          status: "pending",
+        });
+      }
+    }
+
+    // Only show pending in queue
+    rows = rows.filter((r) => r.status === "pending");
+
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(
+      (r) =>
+        r.line.toLowerCase().includes(q) ||
+        r.userLabel.toLowerCase().includes(q) ||
+        r.index.toString() === q ||
+        r.status.toLowerCase().includes(q),
+    );
+  }, [job, memberById, search, historyJobs, distAccum, linesPerTick, selected]);
+
+  const historyRows = useMemo(() => {
+    type R = {
+      index: number;
+      line: string;
+      userId: string;
+      userLabel: string;
+      status: "sent" | "failed";
+      sentAt?: number;
+    };
+    const rows: R[] = [];
+
+    // Current job
+    if (job) {
+      if (job.queue && job.queue.length) {
+        for (const q of job.queue) {
+          if (q.status === "pending") continue;
+          const m = memberById[q.userId];
+          const userLabel = m ? `${m.name} (${m.email})` : q.userId;
+          rows.push({
+            index: q.lineNumber,
+            line: q.line,
+            userId: q.userId,
+            userLabel,
+            status: q.status as any,
+            sentAt: (q as any).sentAt,
+          });
+        }
+      } else {
+        const T = job.targets.length || 1;
+        const L = job.linesPerTick;
+        const round = T * L;
+        for (
+          let i = 0;
+          i < Math.min(job.nextIndex, job.textLines.length);
+          i++
+        ) {
+          const inRound = i % round;
+          const targetIdx = Math.floor(inRound / L);
+          const userId = job.targets[targetIdx] || job.targets[0];
+          const m = memberById[userId];
+          const userLabel = m ? `${m.name} (${m.email})` : userId;
+          rows.push({
+            index: i + 1,
+            line: job.textLines[i],
+            userId,
+            userLabel,
+            status: "sent",
+          });
+        }
+      }
+    }
+
+    // Previous jobs
+    for (const hj of historyJobs) {
+      for (const q of hj.queue || []) {
+        if (q.status === "pending") continue;
+        const m = memberById[q.userId];
+        const userLabel = m ? `${m.name} (${m.email})` : q.userId;
+        rows.push({
+          index: q.lineNumber,
+          line: q.line,
+          userId: q.userId,
+          userLabel,
+          status: q.status as any,
+          sentAt: (q as any).sentAt,
+        });
+      }
+    }
+
+    // Sort by time desc if available
+    rows.sort((a, b) => (b.sentAt || 0) - (a.sentAt || 0));
+
+    const q = historySearch.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(
+      (r) =>
+        r.line.toLowerCase().includes(q) ||
+        r.userLabel.toLowerCase().includes(q) ||
+        r.index.toString() === q ||
+        r.status.toLowerCase().includes(q),
+    );
+  }, [job, historyJobs, memberById, historySearch]);
+
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="space-y-6">
+      <Card className="bg-white/5 border-white/10 text-white">
+        <CardHeader>
+          <CardTitle>De-Duplication</CardTitle>
+          <CardDescription className="text-white/70">
+            Paste lines here. If first 15 words match, duplicates are removed
+            live.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="max-h-[60vh] overflow-y-auto pr-2">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-white">Input</Label>
+              <Textarea
+                value={rawInput}
+                onChange={(e) => setRawInput(e.target.value)}
+                rows={10}
+                className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
+                placeholder={"Paste or type lines here for de-duplication"}
+              />
+              <div className="flex items-center justify-between text-sm text-white/70">
+                <span>
+                  Kept lines: {dedupText ? dedupText.split("\n").length : 0}
+                </span>
+                <Button
+                  variant="secondary"
+                  type="button"
+                  disabled={!dedupText.trim()}
+                  onClick={() =>
+                    setDistAccum((prev) => {
+                      const add = dedupText.trim();
+                      if (!add) return prev;
+                      const prevLines = prev
+                        ? prev.replace(/\r\n/g, "\n").split("\n")
+                        : [];
+                      const addLines = add.replace(/\r\n/g, "\n").split("\n");
+                      const key = (s: string) =>
+                        s
+                          .trim()
+                          .replace(/[\t]+/g, " ")
+                          .split(/\s+/)
+                          .slice(0, 15)
+                          .map((w) =>
+                            w.replace(/^[^\w]+|[^\w]+$/g, "").toLowerCase(),
+                          )
+                          .filter(Boolean)
+                          .join(" ");
+                      const seen = new Set(prevLines.map(key).filter(Boolean));
+                      const uniques = addLines.filter((l) => {
+                        const k = key(l);
+                        if (!k || seen.has(k)) return false;
+                        seen.add(k);
+                        return true;
+                      });
+                      if (uniques.length === 0) return prev;
+                      return prevLines.length
+                        ? `${prev}\n${uniques.join("\n")}`
+                        : uniques.join("\n");
+                    })
+                  }
+                >
+                  Add to Distributor
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white">Live Preview</Label>
+              <Textarea
+                value={dedupText}
+                readOnly
+                rows={10}
+                className="bg-white/10 text-white border-white/20"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="bg-white/5 border-white/10 text-white">
         <CardHeader>
           <CardTitle>Distributor</CardTitle>
@@ -85,19 +418,32 @@ export default function Distributor() {
             Set timer and lines-per-send
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+          {job && job.status === "running" && (
+            <div className="flex items-center justify-between rounded border border-white/10 bg-white/5 p-3">
+              <div>
+                <p className="font-medium">
+                  Job running • {job.linesPerTick} lines • {job.intervalSec}s
+                </p>
+                <p className="text-white/60 text-sm">
+                  You can start another job while this runs. Queue is below.
+                </p>
+              </div>
+              <Button variant="destructive" onClick={() => cancel(job.id)}>
+                Cancel
+              </Button>
+            </div>
+          )}
+
           <div>
             <Label className="text-white">
               Text (each line will be sent separately)
             </Label>
             <Textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
+              value={distAccum}
+              readOnly
               rows={10}
-              className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
-              placeholder={
-                "Write lines here...\nEach line will be sent as a separate message."
-              }
+              className="bg-white/10 text-white border-white/20"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -155,49 +501,160 @@ export default function Distributor() {
             </div>
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
-          <Button
-            type="button"
-            onClick={start}
-            disabled={!text.trim() || !Object.values(selected).some(Boolean)}
-          >
-            Start
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              onClick={start}
+              disabled={
+                !distAccum.trim() || !Object.values(selected).some(Boolean)
+              }
+            >
+              Start
+            </Button>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => setDistAccum("")}
+              disabled={!distAccum.trim()}
+            >
+              Clear
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
       <Card className="bg-white/5 border-white/10 text-white">
-        <CardHeader>
-          <CardTitle>Jobs</CardTitle>
-          <CardDescription className="text-white/70">
-            Running and completed jobs
-          </CardDescription>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <CardTitle>Queue</CardTitle>
+            <CardDescription className="text-white/70">
+              Line-wise progress with recipient and status
+            </CardDescription>
+          </div>
+          <div className="w-full sm:w-64">
+            <Input
+              placeholder="Search line, user, status..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
+            />
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {jobs.map((j) => (
-              <div
-                key={j.id}
-                className="p-3 rounded bg-white/5 border border-white/10 flex items-center justify-between"
-              >
-                <div>
-                  <p className="font-medium">
-                    {j.status.toUpperCase()} • {j.linesPerTick} lines •{" "}
-                    {j.intervalSec}s
-                  </p>
-                  <p className="text-white/60 text-sm">
-                    Sent {j.nextIndex}/{j.textLines.length} lines
-                  </p>
-                </div>
-                {j.status === "running" ? (
-                  <Button variant="destructive" onClick={() => cancel(j.id)}>
-                    Cancel
-                  </Button>
-                ) : (
-                  <span className="text-white/60 text-sm">Done</span>
+        <CardContent className="max-h-[60vh] overflow-y-auto pr-2">
+          <div className="rounded-md border border-white/10 bg-white/5">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[90px]">Line #</TableHead>
+                  <TableHead>Line</TableHead>
+                  <TableHead className="w-[280px]">User</TableHead>
+                  <TableHead className="w-[120px]">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {queueRows.map((r) => (
+                  <TableRow key={`${r.index}-${r.userId}`}>
+                    <TableCell>#{r.index}</TableCell>
+                    <TableCell className="text-white/90 whitespace-pre-wrap">
+                      {r.line}
+                    </TableCell>
+                    <TableCell className="text-white/80">
+                      {r.userLabel}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={
+                          r.status === "sent"
+                            ? "text-green-400"
+                            : r.status === "failed"
+                              ? "text-red-400"
+                              : "text-yellow-300"
+                        }
+                      >
+                        {r.status}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {queueRows.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-white/60"
+                    >
+                      No matching rows
+                    </TableCell>
+                  </TableRow>
                 )}
-              </div>
-            ))}
-            {jobs.length === 0 && <p className="text-white/60">No jobs yet.</p>}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/5 border-white/10 text-white">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <CardTitle>History</CardTitle>
+            <CardDescription className="text-white/70">
+              Sent lines (database)
+            </CardDescription>
+          </div>
+          <div className="w-full sm:w-64">
+            <Input
+              placeholder="Search line, user, status..."
+              value={historySearch}
+              onChange={(e) => setHistorySearch(e.target.value)}
+              className="bg-white/10 text-white border-white/20 placeholder:text-white/40"
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="max-h-[60vh] overflow-y-auto pr-2">
+          <div className="rounded-md border border-white/10 bg-white/5">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[90px]">Line #</TableHead>
+                  <TableHead>Line</TableHead>
+                  <TableHead className="w-[280px]">User</TableHead>
+                  <TableHead className="w-[120px]">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {historyRows.map((r, i) => (
+                  <TableRow key={`${r.index}-${r.userId}-h-${i}`}>
+                    <TableCell>#{r.index}</TableCell>
+                    <TableCell className="text-white/90 whitespace-pre-wrap">
+                      {r.line}
+                    </TableCell>
+                    <TableCell className="text-white/80">
+                      {r.userLabel}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={
+                          r.status === "sent"
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }
+                      >
+                        {r.status}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {historyRows.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-white/60"
+                    >
+                      No matching rows
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
